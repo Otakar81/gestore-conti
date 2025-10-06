@@ -1,0 +1,328 @@
+{
+  "eredi": [
+    "Mamma",
+    "Micaela",
+    "Francesca",
+    "G.Claudio",
+    "M.Elena"
+  ],
+  "quote_percentuali": {
+    "Mamma": 20.0,
+    "Micaela": 20.0,
+    "Francesca": 20.0,
+    "G.Claudio": 20.0,
+    "M.Elena": 20.0
+  },
+  "quote_reali": {
+    "Mamma": 0.5,
+    "Micaela": 0.125,
+    "Francesca": 0.125,
+    "G.Claudio": 0.125,
+    "M.Elena": 0.125
+  },
+  "spese": [
+    {
+      "categoria": "Geometra",
+      "creditore": "Tatiana",
+      "descrizione": "Anticipo Tatiana",
+      "data": "2025/04",
+      "importo": 416.0,
+      "pagamenti": {
+        "Mamma": 0.0,
+        "Micaela": 0.0,
+        "Francesca": 0.0,
+        "G.Claudio": 416.0,
+        "M.Elena": 0.0
+      }
+    },
+    {
+      "categoria": "Geometra",
+      "creditore": "Tatiana",
+      "descrizione": "Geometra Rata 01",
+      "data": "2025/07",
+      "importo": 840.0,
+      "pagamenti": {
+        "Mamma": 0.0,
+        "Micaela": 0.0,
+        "Francesca": 0.0,
+        "G.Claudio": 840.0,
+        "M.Elena": 0.0
+      }
+    },
+    {
+      "categoria": "Geometra",
+      "creditore": "Tatiana",
+      "descrizione": "Geometra Rata 02",
+      "data": "2025/09",
+      "importo": 840.0,
+      "pagamenti": {
+        "Mamma": 0.0,
+        "Micaela": 0.0,
+        "Francesca": 0.0,
+        "G.Claudio": 840.0,
+        "M.Elena": 0.0
+      }
+    },
+    {
+      "categoria": "Geometra",
+      "creditore": "Tatiana",
+      "descrizione": "Geometra Rata 03",
+      "data": "",
+      "importo": 840.0,
+      "pagamenti": {
+        "Mamma": 0.0,
+        "Micaela": 0.0,
+        "Francesca": 0.0,
+        "G.Claudio": 0.0,
+        "M.Elena": 0.0
+      }
+    },
+    {
+      "categoria": "Geometra",
+      "creditore": "Tatiana",
+      "descrizione": "Geometra Rata 04",
+      "data": "",
+      "importo": 840.0,
+      "pagamenti": {
+        "Mamma": 0.0,
+        "Micaela": 0.0,
+        "Francesca": 0.0,
+        "G.Claudio": 0.0,
+        "M.Elena": 0.0
+      }
+    },
+    {
+      "categoria": "Varie",
+      "creditore": "Unicredit",
+      "descrizione": "Richiesta Saldo Unicredit papà",
+      "data": "2025/07",
+      "importo": 100.0,
+      "pagamenti": {
+        "Mamma": 100.0,
+        "Micaela": 0.0,
+        "Francesca": 0.0,
+        "G.Claudio": 0.0,
+        "M.Elena": 0.0
+      }
+    },
+    {
+      "categoria": "Varie",
+      "creditore": "Agenzia entrate",
+      "descrizione": "Debito dichiarazione dei redditi 2024",
+      "data": "2025/09",
+      "importo": 1000.0,
+      "pagamenti": {
+        "Mamma": 0.0,
+        "Micaela": 0.0,
+        "Francesca": 0.0,
+        "G.Claudio": 1000.0,
+        "M.Elena": 0.0
+      }
+    },
+    {
+      "categoria": "Imposte",
+      "creditore": "Agenzia entrate",
+      "descrizione": "Successione - Rata 01",
+      "data": "2025/09",
+      "importo": 2516.0,
+      "pagamenti": {
+        "Mamma": 2516.0,
+        "Micaela": 0.0,
+        "Francesca": 0.0,
+        "G.Claudio": 0.0,
+        "M.Elena": 0.0
+      }
+    },
+    {
+      "categoria": "Imposte",
+      "creditore": "Agenzia entrate",
+      "descrizione": "Successione - Rata 02",
+      "data": "2025/09",
+      "importo": 2500.0,
+      "pagamenti": {
+        "Mamma": 2500.0,
+        "Micaela": 0.0,
+        "Francesca": 0.0,
+        "G.Claudio": 0.0,
+        "M.Elena": 0.0
+      }
+    },
+    {
+      "categoria": "Bollette",
+      "creditore": "Enel",
+      "descrizione": "Periodo: 11/24 -> 03/25",
+      "data": "2025/04",
+      "importo": 130.55,
+      "pagamenti": {
+        "Mamma": 0.0,
+        "Micaela": 0.0,
+        "Francesca": 0.0,
+        "G.Claudio": 130.55,
+        "M.Elena": 0.0
+      }
+    },
+    {
+      "categoria": "Bollette",
+      "creditore": "Enel",
+      "descrizione": "Periodo: 06/25 -> 07/25",
+      "data": "2025/07",
+      "importo": 42.58,
+      "pagamenti": {
+        "Mamma": 42.58,
+        "Micaela": 0.0,
+        "Francesca": 0.0,
+        "G.Claudio": 0.0,
+        "M.Elena": 0.0
+      }
+    },
+    {
+      "categoria": "Bollette",
+      "creditore": "Comune Cetraro (Acqua)",
+      "descrizione": "Anno 2023",
+      "data": "2025/08",
+      "importo": 202.13,
+      "pagamenti": {
+        "Mamma": 0.0,
+        "Micaela": 0.0,
+        "Francesca": 0.0,
+        "G.Claudio": 202.13,
+        "M.Elena": 0.0
+      }
+    },
+    {
+      "categoria": "Bollette",
+      "creditore": "Comune Cetraro (Acqua)",
+      "descrizione": "Anno 2024",
+      "data": "2024/10",
+      "importo": 202.13,
+      "pagamenti": {
+        "Mamma": 202.13,
+        "Micaela": 0.0,
+        "Francesca": 0.0,
+        "G.Claudio": 0.0,
+        "M.Elena": 0.0
+      }
+    },
+    {
+      "categoria": "Bollette",
+      "creditore": "Comune Cetraro (Acqua)",
+      "descrizione": "Anno 2025",
+      "data": "",
+      "importo": 220.46,
+      "pagamenti": {
+        "Mamma": 0.0,
+        "Micaela": 0.0,
+        "Francesca": 0.0,
+        "G.Claudio": 0.0,
+        "M.Elena": 0.0
+      }
+    },
+    {
+      "categoria": "Tasse",
+      "creditore": "Comune Cetraro (TARI)",
+      "descrizione": "Anno 2023",
+      "data": "2025/08",
+      "importo": 433.0,
+      "pagamenti": {
+        "Mamma": 0.0,
+        "Micaela": 0.0,
+        "Francesca": 0.0,
+        "G.Claudio": 433.0,
+        "M.Elena": 0.0
+      }
+    },
+    {
+      "categoria": "Tasse",
+      "creditore": "Comune Cetraro (TARI)",
+      "descrizione": "Anno 2024",
+      "data": "2025/08",
+      "importo": 458.0,
+      "pagamenti": {
+        "Mamma": 458.0,
+        "Micaela": 0.0,
+        "Francesca": 0.0,
+        "G.Claudio": 0.0,
+        "M.Elena": 0.0
+      }
+    },
+    {
+      "categoria": "Tasse",
+      "creditore": "Comune Cetraro (TARI)",
+      "descrizione": "Anno 2025 - Rata 1",
+      "data": "2025/09",
+      "importo": 115.0,
+      "pagamenti": {
+        "Mamma": 115.0,
+        "Micaela": 0.0,
+        "Francesca": 0.0,
+        "G.Claudio": 0.0,
+        "M.Elena": 0.0
+      }
+    },
+    {
+      "categoria": "Tasse",
+      "creditore": "Comune Cetraro (TARI)",
+      "descrizione": "Anno 2025 - Rata 2",
+      "data": "",
+      "importo": 115.0,
+      "pagamenti": {
+        "Mamma": 0.0,
+        "Micaela": 0.0,
+        "Francesca": 0.0,
+        "G.Claudio": 0.0,
+        "M.Elena": 0.0
+      }
+    },
+    {
+      "categoria": "Tasse",
+      "creditore": "Comune Cetraro (TARI)",
+      "descrizione": "Anno 2025 - Rata 3",
+      "data": "",
+      "importo": 115.0,
+      "pagamenti": {
+        "Mamma": 0.0,
+        "Micaela": 0.0,
+        "Francesca": 0.0,
+        "G.Claudio": 0.0,
+        "M.Elena": 0.0
+      }
+    },
+    {
+      "categoria": "Tasse",
+      "creditore": "Comune Cetraro (TARI)",
+      "descrizione": "Anno 2025 - Rata 4",
+      "data": "",
+      "importo": 115.0,
+      "pagamenti": {
+        "Mamma": 0.0,
+        "Micaela": 0.0,
+        "Francesca": 0.0,
+        "G.Claudio": 0.0,
+        "M.Elena": 0.0
+      }
+    },
+    {
+      "categoria": "Bollette",
+      "creditore": "Enel",
+      "descrizione": "Periodo: 08/25 -> 09/25",
+      "data": "2025/10",
+      "importo": 40.0,
+      "pagamenti": {
+        "Mamma": 40.0,
+        "Micaela": 0.0,
+        "Francesca": 0.0,
+        "G.Claudio": 0.0,
+        "M.Elena": 0.0
+      }
+    }
+  ],
+  "trasferimenti": [
+    {
+      "data": "2025/09",
+      "da": "Francesca",
+      "a": "Mamma",
+      "importo": 2500.0,
+      "note": "Seconda rata successione"
+    }
+  ]
+}
