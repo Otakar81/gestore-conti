@@ -67,13 +67,13 @@
       "categoria": "Geometra",
       "creditore": "Tatiana",
       "descrizione": "Geometra Rata 03",
-      "data": "",
+      "data": "2025/10",
       "importo": 840.0,
       "pagamenti": {
         "Mamma": 0.0,
         "Micaela": 0.0,
         "Francesca": 0.0,
-        "G.Claudio": 0.0,
+        "G.Claudio": 840.0,
         "M.Elena": 0.0
       }
     },
