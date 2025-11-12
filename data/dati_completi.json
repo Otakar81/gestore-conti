@@ -81,13 +81,13 @@
       "categoria": "Geometra",
       "creditore": "Tatiana",
       "descrizione": "Geometra Rata 04",
-      "data": "",
-      "importo": 840.0,
+      "data": "2025/11",
+      "importo": 440.0,
       "pagamenti": {
         "Mamma": 0.0,
         "Micaela": 0.0,
         "Francesca": 0.0,
-        "G.Claudio": 0.0,
+        "G.Claudio": 440.0,
         "M.Elena": 0.0
       }
     },
