@@ -162,6 +162,20 @@
       }
     },
     {
+      "categoria": "Varie",
+      "creditore": "Unicredit",
+      "descrizione": "Ripianamento scoperto conto papà",
+      "data": "2025/11",
+      "importo": 2600.0,
+      "pagamenti": {
+        "Mamma": 0.0,
+        "Micaela": 0.0,
+        "Francesca": 0.0,
+        "G.Claudio": 2600.0,
+        "M.Elena": 0.0
+      }
+    },
+    {
       "categoria": "Bollette",
       "creditore": "Enel",
       "descrizione": "Periodo: 11/24 -> 03/25",
