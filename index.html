@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestione Eredità</title>
+	<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
 	
 	<!-- Manifest e tema -->
 	<link rel="manifest" href="manifest.json">
@@ -20,139 +21,57 @@
 	</script>
 	
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            margin: 0;
+            height: 100vh;
             display: flex;
-            align-items: center;
             justify-content: center;
-            padding: 20px;
+            align-items: center;
+            font-family: Poppins, sans-serif;
+            background: linear-gradient(135deg, #d6dfff, #eaf7ff);
         }
-        
-        .container {
-            background: white;
+        .glass {
+            width: 480px;
+            padding: 40px;
             border-radius: 20px;
-            padding: 60px 40px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 600px;
-            width: 100%;
+            background: rgba(255,255,255,0.25);
+            backdrop-filter: blur(16px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
             text-align: center;
         }
-        
         h1 {
+            margin-top: 0;
+            font-weight: 700;
+        }
+        p {
             color: #333;
-            margin-bottom: 15px;
-            font-size: 2.5em;
         }
-        
-        .subtitle {
-            color: #666;
-            margin-bottom: 50px;
-            font-size: 1.1em;
-        }
-        
-        .buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        
         .btn {
             display: block;
-            padding: 25px 40px;
-            font-size: 1.3em;
-            font-weight: 600;
-            text-decoration: none;
+            margin: 12px 0;
+            padding: 15px;
+            background: rgba(255,255,255,0.4);
             border-radius: 12px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-decoration: none;
+            color: #003366;
+            font-weight: 600;
+            transition: 0.2s;
         }
-        
-        .btn-successione {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        
-        .btn-successione:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-        }
-        
-        .btn-immobili {
-            background: linear-gradient(135deg, #fbe593 0%, #553700 100%);
-            color: white;
-        }
-        
-        .btn-immobili:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(245, 87, 108, 0.4);
-        }
-		
-		.btn-completa {
-            background: linear-gradient(135deg, #83ff81 0%, #141613 100%);			
-            color: white;
-        }
-        
-        .btn-completa:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(245, 87, 108, 0.4);
-        }
-        
-        .info {
-            margin-top: 40px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            color: #666;
-            font-size: 0.9em;
-            line-height: 1.6;
-        }
-        
-        @media (max-width: 600px) {
-            .container {
-                padding: 40px 25px;
-            }
-            
-            h1 {
-                font-size: 2em;
-            }
-            
-            .btn {
-                padding: 20px 30px;
-                font-size: 1.1em;
-            }
+        .btn:hover {
+            background: rgba(255,255,255,0.7);
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <h1>📊 Gestione Eredità</h1>
-        <p class="subtitle">Seleziona la dashboard da visualizzare</p>
-        
-        <div class="buttons">
-            <a href="dashboard_successione.html" class="btn btn-successione">
-                📋 Successione
-            </a>
-            <a href="dashboard_immobili.html" class="btn btn-immobili">
-                🏠 Immobili
-            </a>
-			<a href="dashboard_completa.html" class="btn btn-completa">
-                📊 Dati completi
-            </a>
-        </div>
-        
-        <div class="info">
-            <strong>ℹ️ Informazioni</strong><br>
-            Le dashboard mostrano in tempo reale la situazione dei pagamenti e dei trasferimenti tra eredi.
-            Quote calcolate al 20% per erede (accordo familiare).
-        </div>
-    </div>
-</body>
+<div class="glass">
+    <h1>Monitoraggio Eredità</h1>
+    <p>Seleziona una sezione</p>
+
+    <a class="btn" href="dashboard_successione.html">📄 Successione</a>
+    <a class="btn" href="dashboard_immobili.html">🏠 Immobili</a>
+    <a class="btn" href="dashboard_completa.html">📊 Dashboard Completa</a>
+		
+	<h5>Le dashboard mostrano in tempo reale la situazione dei pagamenti e dei trasferimenti tra eredi.
+		Quote calcolate al 20% per erede (accordo familiare).</h5>	
+		
+</div>
 </html>
