@@ -145,6 +145,7 @@ function calcolaChiDeveAChi() {
 	}
 
 	// Struttura base blocco
+	/*
 	container.innerHTML = `
 		<div style="margin-bottom:30px;">
 			<canvas id="graficoSaldi" style="max-height:300px;"></canvas>
@@ -162,6 +163,14 @@ function calcolaChiDeveAChi() {
 			<div id="suggerimenti" style="margin-top:20px;"></div>
 		</div>
 	`;
+	*/
+	container.innerHTML = `
+		<div style="margin-bottom:30px;">
+			<canvas id="graficoSaldi" style="max-height:300px;"></canvas>
+		</div>		
+	`;
+	// Ho eliminato il suggeritore, per adesso
+	
 
 	// Grafico a barre saldi
 	const ctx = document.getElementById('graficoSaldi').getContext('2d');
@@ -189,7 +198,8 @@ function calcolaChiDeveAChi() {
 		}
 	});
 
-	// Suggeritore pagamenti
+	// Suggeritore pagamenti	
+	/*
 	document.getElementById('btnSuggerisci').addEventListener('click', () => {
 		const debitoreNome = document.getElementById('debitoreSelect').value;
 		let importoDisponibile = parseFloat(document.getElementById('importoDisponibile').value || 0);
@@ -229,6 +239,7 @@ function calcolaChiDeveAChi() {
 			`).join('')}
 		`;
 	});
+	*/
 }
 
 
