@@ -274,12 +274,12 @@ function mostraSpese() {
 		
 		return `
 			<tr>
-				<td>${spesa.data || '<em style="color:#999;">—</em>'}</td>
-				<td>${spesa.categoria}</td>
-				<td>${spesa.creditore}</td>
-				<td>${spesa.descrizione}</td>
-				<td class="currency">${formatCurrency(spesa.importo)}</td>
-				<td>${pagatoDa}</td>
+				<td data-label="Data">${spesa.data || '<em style="color:#999;">—</em>'}</td>
+				<td data-label="Categoria">${spesa.categoria}</td>
+				<td data-label="Creditore">${spesa.creditore}</td>
+				<td data-label="Descrizione">${spesa.descrizione}</td>
+				<td data-label="Importo" class="currency">${formatCurrency(spesa.importo)}</td>
+				<td data-label="Pagato da">${pagatoDa}</td>
 			</tr>
 		`;
 	}).join('');
@@ -291,11 +291,11 @@ function mostraTrasferimenti() {
 	
 	tbody.innerHTML = dati.trasferimenti.map(t => `
 		<tr>
-			<td>${t.data}</td>
-			<td>${t.da}</td>
-			<td>${t.a}</td>
-			<td class="currency positive-amount">${formatCurrency(t.importo)}</td>
-			<td>${t.note}</td>
+			<td data-label="Data">${t.data}</td>
+			<td data-label="Da">${t.da}</td>
+			<td data-label="A">${t.a}</td>
+			<td data-label="Importo" class="currency positive-amount">${formatCurrency(t.importo)}</td>
+			<td data-label="Note">${t.note}</td>
 		</tr>
 	`).join('');
 }
