@@ -1,11 +1,25 @@
-const CACHE_NAME = "gestore-conti-cache-v2";
+const CACHE_NAME = "gestore-conti-cache-v3";
 const URLS_TO_CACHE = [
   "./",
   "index.html",
+  "dashboard_successione.html",
+  "dashboard_immobili.html",
+  "dashboard_completa.html",
+
+  // assets
   "manifest.json",
+  "favicon.png",
   "icon-192.png",
-  "icon-512.png"
-  // puoi aggiungere CSS, JS e altri file essenziali
+  "icon-512.png",
+
+  // css
+  "css/common.css",
+  "css/tema_completa.css",
+  "css/tema_immobili.css",
+  "css/tema_successione.css",
+
+  // js  
+  "js/dashboard.js"
 ];
 
 self.addEventListener("install", (event) => {
