@@ -13,31 +13,70 @@ let sortState = {
 	trasferimenti: { column: null, direction: 'asc' }
 };
 
+// 🔍 Rileva se siamo in modalità "card" (mobile verticale)
+function isMobileCardMode() {
+    const isNarrow = window.innerWidth < 768;
+    const isPortrait = window.matchMedia
+        ? window.matchMedia('(orientation: portrait)').matches
+        : window.innerHeight > window.innerWidth;
+
+    return isNarrow && isPortrait;  // solo mobile + portrait
+}
+
+let lastCardMode = null;
+
 // ============================================================
 // 📦 Inizializzazione generale
 // ============================================================
 
 function inizializzaApp() {
-	calcolaRiepilogo();
-	calcolaChiDeveAChi();
-	popolaFiltriCategorie();
-	mostraSpese();
-	mostraTrasferimenti();
-	
-	// Event listeners per filtri
-	document.getElementById('filtroCategoria').addEventListener('change', mostraSpese);
-	document.getElementById('filtroRicerca').addEventListener('input', mostraSpese);
-	document.getElementById('filtroDaPagare').addEventListener('change', mostraSpese);
-	
-	// Event listeners per ordinamento
-	document.querySelectorAll('#tabellaSpese th.sortable').forEach(th => {
-		th.addEventListener('click', () => ordinaTabella('spese', th));
-	});
-	
-	document.querySelectorAll('#tabellaTrasferimenti th.sortable').forEach(th => {
-		th.addEventListener('click', () => ordinaTabella('trasferimenti', th));
-	});
+    calcolaRiepilogo();
+    calcolaChiDeveAChi();
+    popolaFiltriCategorie();
+    mostraSpese();
+    mostraTrasferimenti();
+
+    // Event listeners per filtri
+    document.getElementById('filtroCategoria').addEventListener('change', mostraSpese);
+    document.getElementById('filtroRicerca').addEventListener('input', mostraSpese);
+    document.getElementById('filtroDaPagare').addEventListener('change', mostraSpese);
+
+    // Event listeners per ordinamento
+    document.querySelectorAll('#tabellaSpese th.sortable').forEach(th => {
+        th.addEventListener('click', () => ordinaTabella('spese', th));
+    });
+
+    document.querySelectorAll('#tabellaTrasferimenti th.sortable').forEach(th => {
+        th.addEventListener('click', () => ordinaTabella('trasferimenti', th));
+    });
+
+    // 🧩 Stato iniziale layout + listener responsive
+    lastCardMode = isMobileCardMode();
+
+    window.addEventListener('resize', () => {
+        clearTimeout(window._resizeTimerDashboard);
+        window._resizeTimerDashboard = setTimeout(() => {
+            aggiornaLayoutTabelleSeNecessario();
+        }, 150);
+    });
+
+    window.addEventListener('orientationchange', () => {
+        setTimeout(() => {
+            aggiornaLayoutTabelleSeNecessario();
+        }, 200);
+    });
 }
+
+function aggiornaLayoutTabelleSeNecessario() {
+    const current = isMobileCardMode();
+    if (current === lastCardMode) {
+        return;
+    }
+    lastCardMode = current;
+    mostraSpese();
+    mostraTrasferimenti();
+}
+
 
 
 // ============================================================
@@ -260,56 +299,127 @@ function popolaFiltriCategorie() {
 }
 
 function mostraSpese() {
-	const tbody = document.querySelector('#tabellaSpese tbody');
-	const filtroCategoria = document.getElementById('filtroCategoria').value;
-	const filtroRicerca = document.getElementById('filtroRicerca').value.toLowerCase();
-	const filtroDaPagare = document.getElementById('filtroDaPagare').checked;
+    const tbody = document.querySelector('#tabellaSpese tbody');
+    const thead = document.querySelector('#tabellaSpese thead');
+    const cardMode = isMobileCardMode();
 
-	const speseFiltrate = dati.spese.filter(spesa => {
-		const matchCategoria = !filtroCategoria || spesa.categoria === filtroCategoria;
-		const matchRicerca = !filtroRicerca || 
-			spesa.descrizione.toLowerCase().includes(filtroRicerca) ||
-			spesa.creditore.toLowerCase().includes(filtroRicerca);
-		
-		// ✅ Filtro "Da pagare": mostra solo spese senza data
-		const matchDaPagare = !filtroDaPagare || !spesa.data;
+    if (thead) {
+        thead.style.display = cardMode ? 'none' : 'table-header-group';
+    }
 
-		return matchCategoria && matchRicerca && matchDaPagare;
-	});
+    const filtroCategoria = document.getElementById('filtroCategoria').value;
+    const filtroRicerca = document.getElementById('filtroRicerca').value.toLowerCase();
+    const filtroDaPagare = document.getElementById('filtroDaPagare').checked;
 
-	tbody.innerHTML = speseFiltrate.map(spesa => {
-		const pagatoDa = Object.entries(spesa.pagamenti)
-			.filter(([_, importo]) => importo > 0)
-			.map(([erede, importo]) => `${erede} (${formatCurrency(importo)})`)
-			.join(', ') || 'Nessuno';
-		
-		return `
-			<tr>
-				<td data-label="Data">${spesa.data || '<em style="color:#999;">—</em>'}</td>
-				<td data-label="Categoria">${spesa.categoria}</td>
-				<td data-label="Creditore">${spesa.creditore}</td>
-				<td data-label="Descrizione">${spesa.descrizione}</td>
-				<td data-label="Importo" class="currency">${formatCurrency(spesa.importo)}</td>
-				<td data-label="Pagato da">${pagatoDa}</td>
-			</tr>
-		`;
-	}).join('');
+    const speseFiltrate = dati.spese.filter(spesa => {
+        const matchCategoria = !filtroCategoria || spesa.categoria === filtroCategoria;
+        const matchRicerca = !filtroRicerca ||
+            spesa.descrizione.toLowerCase().includes(filtroRicerca) ||
+            spesa.creditore.toLowerCase().includes(filtroRicerca);
+
+        // ✅ Filtro "Da pagare": mostra solo spese senza data
+        const matchDaPagare = !filtroDaPagare || !spesa.data;
+
+        return matchCategoria && matchRicerca && matchDaPagare;
+    });
+
+    // 🖥️ Desktop / landscape: tabella classica
+    if (!cardMode) {
+        tbody.innerHTML = speseFiltrate.map(spesa => {
+            const pagatoDa = Object.entries(spesa.pagamenti)
+                .filter(([_, importo]) => importo > 0)
+                .map(([erede, importo]) => `${erede} (${formatCurrency(importo)})`)
+                .join(', ') || 'Nessuno';
+
+            return `
+                <tr>
+                    <td>${spesa.data || '<em style="color:#999;">—</em>'}</td>
+                    <td>${spesa.categoria}</td>
+                    <td>${spesa.creditore}</td>
+                    <td>${spesa.descrizione}</td>
+                    <td class="currency">${formatCurrency(spesa.importo)}</td>
+                    <td>${pagatoDa}</td>
+                </tr>
+            `;
+        }).join('');
+        return;
+    }
+
+    // 📱 Mobile portrait: CARD
+    tbody.innerHTML = speseFiltrate.map(spesa => {
+        const pagatoDa = Object.entries(spesa.pagamenti)
+            .filter(([_, importo]) => importo > 0)
+            .map(([erede, importo]) => `${erede} (${formatCurrency(importo)})`)
+            .join(', ') || 'Nessuno';
+
+        return `
+            <tr class="spesa-card-row">
+                <td colspan="6">
+                    <div class="spesa-card">
+                        <div class="spesa-card-header">
+                            <div class="spesa-card-title">
+                                <span class="spesa-card-data">${spesa.data || '—'}</span>
+                                <span class="spesa-card-categoria">${spesa.categoria || ''}</span>
+                            </div>
+                            <div class="spesa-card-importo">${formatCurrency(spesa.importo)}</div>
+                        </div>
+                        <div class="spesa-card-body">
+                            <div class="spesa-card-descrizione">${spesa.descrizione || ''}</div>
+                            <div class="spesa-card-creditore"><strong>Creditore:</strong> ${spesa.creditore || ''}</div>
+                            <div class="spesa-card-pagato"><strong>Pagato da:</strong> ${pagatoDa}</div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
 }
+
 
 
 function mostraTrasferimenti() {
-	const tbody = document.querySelector('#tabellaTrasferimenti tbody');
-	
-	tbody.innerHTML = dati.trasferimenti.map(t => `
-		<tr>
-			<td data-label="Data">${t.data}</td>
-			<td data-label="Da">${t.da}</td>
-			<td data-label="A">${t.a}</td>
-			<td data-label="Importo" class="currency positive-amount">${formatCurrency(t.importo)}</td>
-			<td data-label="Note">${t.note}</td>
-		</tr>
-	`).join('');
+    const tbody = document.querySelector('#tabellaTrasferimenti tbody');
+    const thead = document.querySelector('#tabellaTrasferimenti thead');
+    const cardMode = isMobileCardMode();
+
+    if (thead) {
+        thead.style.display = cardMode ? 'none' : 'table-header-group';
+    }
+
+    // 🖥️ Desktop / landscape: tabella classica
+    if (!cardMode) {
+        tbody.innerHTML = dati.trasferimenti.map(t => `
+            <tr>
+                <td>${t.data}</td>
+                <td>${t.da}</td>
+                <td>${t.a}</td>
+                <td class="currency positive-amount">${formatCurrency(t.importo)}</td>
+                <td>${t.note || ''}</td>
+            </tr>
+        `).join('');
+        return;
+    }
+
+    // 📱 Mobile portrait: CARD
+    tbody.innerHTML = dati.trasferimenti.map(t => `
+        <tr class="trasf-card-row">
+            <td colspan="5">
+                <div class="trasf-card">
+                    <div class="trasf-card-header">
+                        <span class="trasf-card-data">${t.data || '—'}</span>
+                        <span class="trasf-card-importo">${formatCurrency(t.importo)}</span>
+                    </div>
+                    <div class="trasf-card-body">
+                        <div><strong>Da:</strong> ${t.da}</div>
+                        <div><strong>A:</strong> ${t.a}</div>
+                        ${t.note ? `<div class="trasf-card-note">${t.note}</div>` : ''}
+                    </div>
+                </div>
+            </td>
+        </tr>
+    `).join('');
 }
+
 
 
 // ============================================================
