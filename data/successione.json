@@ -183,6 +183,13 @@
       "a": "Mamma",
       "importo": 2500.0,
       "note": "Seconda rata successione"
+    },
+    {
+      "data": "2025/12",
+      "da": "Mamma",
+      "a": "G.Claudio",
+      "importo": 1000.0,
+      "note": "Debito dichiarazione dei redditi 2024"
     }
   ]
 }
