@@ -190,6 +190,13 @@
       "a": "G.Claudio",
       "importo": 1000.0,
       "note": "Debito dichiarazione dei redditi 2024"
+    },
+    {
+      "data": "2025/12",
+      "da": "Francesca",
+      "a": "G.Claudio",
+      "importo": 500.0,
+      "note": ""
     }
   ]
 }

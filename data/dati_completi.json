@@ -334,11 +334,25 @@
       "creditore": "Enel",
       "descrizione": "Periodo: 08/25 -> 09/25",
       "data": "2025/10",
-      "importo": 40.0,
+      "importo": 42.0,
       "pagamenti": {
-        "Mamma": 40.0,
+        "Mamma": 42.0,
         "Micaela": 0.0,
         "Francesca": 0.0,
+        "G.Claudio": 0.0,
+        "M.Elena": 0.0
+      }
+    },
+    {
+      "categoria": "Bollette",
+      "creditore": "Enel",
+      "descrizione": "Periodo: 10/25 -> 11/25",
+      "data": "2025/12",
+      "importo": 42.0,
+      "pagamenti": {
+        "Mamma": 0.0,
+        "Micaela": 0.0,
+        "Francesca": 42.0,
         "G.Claudio": 0.0,
         "M.Elena": 0.0
       }
@@ -358,6 +372,13 @@
       "a": "G.Claudio",
       "importo": 1000.0,
       "note": "Debito dichiarazione dei redditi 2024"
+    },
+    {
+      "data": "2025/12",
+      "da": "Francesca",
+      "a": "G.Claudio",
+      "importo": 500.0,
+      "note": ""
     }
   ]
 }
