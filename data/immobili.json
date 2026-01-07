@@ -202,6 +202,20 @@
         "G.Claudio": 0.0,
         "M.Elena": 0.0
       }
+    },
+    {
+      "categoria": "Tasse",
+      "creditore": "Comune Cetraro (IMU)",
+      "descrizione": "Anno 2020 (con mora)",
+      "data": "2026/01",
+      "importo": 1840.0,
+      "pagamenti": {
+        "Mamma": 0.0,
+        "Micaela": 0.0,
+        "Francesca": 0.0,
+        "G.Claudio": 1840.0,
+        "M.Elena": 0.0
+      }
     }
   ],
   "trasferimenti": []
