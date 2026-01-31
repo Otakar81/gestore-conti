@@ -370,6 +370,20 @@
         "G.Claudio": 1840.0,
         "M.Elena": 0.0
       }
+    },
+    {
+      "categoria": "Bollette",
+      "creditore": "Enel",
+      "descrizione": "Periodo: 12/25 -> 01/26",
+      "data": "2026/01",
+      "importo": 43.0,
+      "pagamenti": {
+        "Mamma": 0.0,
+        "Micaela": 0.0,
+        "Francesca": 0.0,
+        "G.Claudio": 43.0,
+        "M.Elena": 0.0
+      }
     }
   ],
   "trasferimenti": [
