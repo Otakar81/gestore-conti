@@ -235,6 +235,20 @@
       "categoria": "Bollette",
       "creditore": "Enel",
       "descrizione": "Periodo: 02/26 -> 03/26",
+      "data": "2026/05",
+      "importo": 42.0,
+      "pagamenti": {
+        "Mamma": 0.0,
+        "Micaela": 0.0,
+        "Francesca": 42.0,
+        "G.Claudio": 0.0,
+        "M.Elena": 0.0
+      }
+    },
+    {
+      "categoria": "Bollette",
+      "creditore": "Enel",
+      "descrizione": "Periodo: 04/26 -> 05/26",
       "data": "",
       "importo": 42.0,
       "pagamenti": {
