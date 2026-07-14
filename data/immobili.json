@@ -262,14 +262,14 @@
     {
       "categoria": "Tasse",
       "creditore": "Comune Cetraro (IMU)",
-      "descrizione": "Anno 2021",
-      "data": "",
-      "importo": 1509.0,
+      "descrizione": "Anno 2021 (con mora)",
+      "data": "2026/07",
+      "importo": 1760.0,
       "pagamenti": {
         "Mamma": 0.0,
         "Micaela": 0.0,
         "Francesca": 0.0,
-        "G.Claudio": 0.0,
+        "G.Claudio": 1760.0,
         "M.Elena": 0.0
       }
     },
