@@ -340,17 +340,42 @@
             return getSpese(dati).reduce((totale, spesa) => totale + (Number(spesa.importo) || 0), 0);
         }
 
+        function normalizzaMese(data) {
+            if (!data) {
+                return null;
+            }
+
+            const match = String(data).match(/^(\d{4})[/-](\d{1,2})/);
+            if (!match) {
+                return null;
+            }
+
+            return `${match[1]}/${match[2].padStart(2, "0")}`;
+        }
+
+        function calcolaUltimoMese(dati) {
+            const spese = getSpese(dati);
+            const trasferimenti = Array.isArray(dati.trasferimenti) ? dati.trasferimenti : [];
+            const mesi = [
+                ...spese.map(spesa => normalizzaMese(spesa.data)),
+                ...trasferimenti.map(trasferimento => normalizzaMese(trasferimento.data))
+            ].filter(Boolean).sort();
+
+            return mesi.length ? mesi[mesi.length - 1] : "-";
+        }
+
         function aggiornaSintesi(datiCompleti, datiSuccessione, datiImmobili) {
             const speseComplete = getSpese(datiCompleti);
             const speseDaPagare = speseComplete.filter(spesa => !spesa.data);
             const totaleDaPagare = speseDaPagare.reduce((totale, spesa) => totale + (Number(spesa.importo) || 0), 0);
+            const ultimoMese = calcolaUltimoMese(datiCompleti);
 
             setText("statTotaleSpese", formatEuro(calcolaTotaleSpese(datiCompleti)));
             setText("statTotaleSuccessione", formatEuro(calcolaTotaleSpese(datiSuccessione)));
             setText("statTotaleImmobili", formatEuro(calcolaTotaleSpese(datiImmobili)));
             setText("statDaPagare", String(speseDaPagare.length));
             setText("statTotaleDaPagare", formatEuro(totaleDaPagare));
-            setText("homeUpdated", "Sintesi aggiornata dai dati completi");
+            setText("homeUpdated", `Dati aggiornati a ${ultimoMese}`);
 
             const status = document.getElementById("statusMessage");
             status.textContent = "Sintesi calcolata dai dati completi.";
