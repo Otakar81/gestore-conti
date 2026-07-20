@@ -1,4 +1,6 @@
 :root {
-    --theme-color: rgb(29 145 0 / 80%);
-    --theme-shadow: rgb(29 145 0 / 50%);
+    --theme-color: #1d9100;
+    --theme-color-strong: #166f00;
+    --theme-color-soft: #f0fdf4;
+    --theme-ring: rgba(29, 145, 0, 0.18);
 }
