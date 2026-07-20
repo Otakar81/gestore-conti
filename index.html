@@ -3,75 +3,388 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestione Eredità</title>
-	<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
-	
-	<!-- Manifest e tema -->
-	<link rel="manifest" href="manifest.json">
-	<meta name="theme-color" content="#2196f3">
-	<link rel="icon" href="icon-192.png" type="image/png">
+    <title>Monitoraggio Eredità</title>
 
-	<!-- Registrazione service worker -->
-	<script>
-	  if ('serviceWorker' in navigator) {
-		navigator.serviceWorker.register('service-worker.js')
-		  .then(() => console.log("Service Worker registrato"))
-		  .catch(err => console.error("Errore SW:", err));
-	  }
-	</script>
-	
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="icon" href="icon-192.png" type="image/png">
+
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/tema_completa.css">
+
     <style>
         body {
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .home-shell {
+            width: min(1120px, 100%);
+            margin: 0 auto;
+        }
+
+        .home-header {
+            align-items: flex-start;
+            border-top-color: var(--border-strong);
+        }
+
+        .home-kicker {
+            margin-bottom: 5px;
+            color: var(--muted);
+            font-size: 0.78rem;
+            font-weight: 750;
+            letter-spacing: 0;
+            text-transform: uppercase;
+        }
+
+        .home-header .header-left h1,
+        .home-section-title {
+            color: var(--text);
+        }
+
+        .home-header .subtitle {
+            max-width: 680px;
+        }
+
+        .home-updated {
+            display: inline-flex;
             align-items: center;
-            font-family: Poppins, sans-serif;
-            background: linear-gradient(135deg, #d6dfff, #eaf7ff);
+            min-height: 34px;
+            padding: 7px 11px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--surface-soft);
+            color: var(--muted);
+            font-size: 0.86rem;
+            font-weight: 650;
+            white-space: nowrap;
         }
-        .glass {
-            width: 480px;
-            padding: 40px;
-            border-radius: 20px;
-            background: rgba(255,255,255,0.25);
-            backdrop-filter: blur(16px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-            text-align: center;
+
+        .nav-grid,
+        .stats-grid {
+            display: grid;
+            gap: 14px;
         }
-        h1 {
-            margin-top: 0;
-            font-weight: 700;
+
+        .nav-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
         }
-        p {
-            color: #333;
+
+        .stats-grid {
+            grid-template-columns: repeat(5, minmax(0, 1fr));
         }
-        .btn {
-            display: block;
-            margin: 12px 0;
-            padding: 15px;
-            background: rgba(255,255,255,0.4);
-            border-radius: 12px;
+
+        .dashboard-link,
+        .stat-card {
+            min-width: 0;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+        }
+
+        .dashboard-link {
+            display: flex;
+            min-height: 156px;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 18px;
+            border-top: 4px solid var(--theme-accent, var(--theme-color));
+            color: var(--text);
             text-decoration: none;
-            color: #003366;
-            font-weight: 600;
-            transition: 0.2s;
+            box-shadow: var(--shadow);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
         }
-        .btn:hover {
-            background: rgba(255,255,255,0.7);
+
+        .dashboard-link:hover,
+        .dashboard-link:focus-visible {
+            border-color: var(--theme-accent, var(--theme-color));
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.11);
+            outline: none;
+            transform: translateY(-1px);
+        }
+
+        .dashboard-link.successione {
+            --theme-accent: #7c3aed;
+            --theme-accent-strong: #6d28d9;
+            --theme-accent-soft: #f5f3ff;
+        }
+
+        .dashboard-link.immobili {
+            --theme-accent: #1d9100;
+            --theme-accent-strong: #166f00;
+            --theme-accent-soft: #f0fdf4;
+        }
+
+        .dashboard-link.completa {
+            --theme-accent: #2563eb;
+            --theme-accent-strong: #1d4ed8;
+            --theme-accent-soft: #eff6ff;
+        }
+
+        .dashboard-link h3 {
+            color: var(--theme-accent-strong, var(--theme-color-strong));
+            font-size: 1.14rem;
+            line-height: 1.2;
+        }
+
+        .dashboard-link p {
+            margin-top: 8px;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        .link-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 18px;
+            color: var(--theme-accent-strong, var(--theme-color-strong));
+            font-size: 0.88rem;
+            font-weight: 750;
+        }
+
+        .link-arrow {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            flex: 0 0 auto;
+            border-radius: 999px;
+            background: var(--theme-accent-soft, var(--theme-color-soft));
+        }
+
+        .stat-card {
+            min-height: 116px;
+            padding: 15px 16px;
+            border-top: 3px solid var(--border-strong);
+        }
+
+        .stat-label {
+            color: var(--muted);
+            font-size: 0.78rem;
+            font-weight: 700;
+            line-height: 1.25;
+        }
+
+        .stat-value {
+            margin-top: 12px;
+            color: var(--text);
+            font-size: 1.35rem;
+            font-weight: 800;
+            line-height: 1.15;
+            overflow-wrap: anywhere;
+        }
+
+        .stat-note {
+            margin-top: 7px;
+            color: var(--muted);
+            font-size: 0.78rem;
+        }
+
+        .status-message {
+            margin-top: 14px;
+            color: var(--muted);
+            font-size: 0.88rem;
+        }
+
+        .status-message.error {
+            color: var(--debit);
+        }
+
+        @media (max-width: 900px) {
+            .nav-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .home-updated {
+                white-space: normal;
+            }
+
+            .dashboard-link {
+                min-height: 132px;
+                padding: 16px;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
-<div class="glass">
-    <h1>Monitoraggio Eredità</h1>
-    <p>Seleziona una sezione</p>
+<body>
+    <div class="home-shell">
+        <header class="header-bar home-header">
+            <div class="header-left">               
+                <h1>Monitoraggio Eredità</h1>
+                <p class="subtitle">Le dashboard mostrano in tempo reale la situazione dei pagamenti e dei trasferimenti tra eredi.</p>
+            </div>
+            <div class="header-right">
+                <span class="home-updated" id="homeUpdated">Dati in caricamento</span>
+            </div>
+        </header>
 
-    <a class="btn" href="dashboard_successione.html">📄 Successione</a>
-    <a class="btn" href="dashboard_immobili.html">🏠 Immobili</a>
-    <a class="btn" href="dashboard_completa.html">📊 Dashboard Completa</a>
-		
-	<h5>Le dashboard mostrano in tempo reale la situazione dei pagamenti e dei trasferimenti tra eredi.
-		Quote calcolate al 20% per erede (accordo familiare).</h5>	
-		
-</div>
+        <main>
+            <section class="section">
+                <div class="section-header">
+                    <div>
+                        <h2 class="home-section-title">Dashboard</h2>
+                        <p class="section-subtitle">Scegli la vista da consultare</p>
+                    </div>
+                </div>
+
+                <div class="nav-grid">
+                    <a class="dashboard-link successione" href="dashboard_successione.html">
+                        <div>
+                            <h3>Successione</h3>
+                            <p>Spese e trasferimenti legati alla pratica di successione.</p>
+                        </div>
+                        <div class="link-footer">
+                            <span>Apri dashboard</span>
+                            <span class="link-arrow" aria-hidden="true">→</span>
+                        </div>
+                    </a>
+
+                    <a class="dashboard-link immobili" href="dashboard_immobili.html">
+                        <div>
+                            <h3>Immobili</h3>
+                            <p>Utenze, tasse e spese varie sugli immobili.</p>
+                        </div>
+                        <div class="link-footer">
+                            <span>Apri dashboard</span>
+                            <span class="link-arrow" aria-hidden="true">→</span>
+                        </div>
+                    </a>
+
+                    <a class="dashboard-link completa" href="dashboard_completa.html">
+                        <div>
+                            <h3>Dashboard completa</h3>
+                            <p>Vista aggregata di successione, immobili, spese e trasferimenti.</p>
+                        </div>
+                        <div class="link-footer">
+                            <span>Apri dashboard</span>
+                            <span class="link-arrow" aria-hidden="true">→</span>
+                        </div>
+                    </a>
+                </div>
+            </section>
+
+            <section class="section">
+                <div class="section-header">
+                    <div>
+                        <h2 class="home-section-title">Sintesi generale</h2>
+                        <p class="section-subtitle">Sintesi calcolata dai dati completi</p>
+                    </div>
+                </div>
+
+                <div class="stats-grid" aria-live="polite">
+                    <div class="stat-card">
+                        <div class="stat-label">Totale spese</div>
+                        <div class="stat-value" id="statTotaleSpese">-</div>
+                        <div class="stat-note">Successione e immobili</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Totale spese successione</div>
+                        <div class="stat-value" id="statTotaleSuccessione">-</div>
+                        <div class="stat-note">Dati successione</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Totale spese immobili</div>
+                        <div class="stat-value" id="statTotaleImmobili">-</div>
+                        <div class="stat-note">Dati immobili</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Spese da pagare</div>
+                        <div class="stat-value" id="statDaPagare">-</div>
+                        <div class="stat-note">Spese senza data</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Totale da pagare</div>
+                        <div class="stat-value" id="statTotaleDaPagare">-</div>
+                        <div class="stat-note">Importi senza data</div>
+                    </div>
+                </div>
+
+                <p class="status-message" id="statusMessage">Caricamento sintesi in corso.</p>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        function formatEuro(value) {
+            const numero = Number(value) || 0;
+            const segno = numero < 0 ? "-" : "";
+            const [interi, decimali] = Math.abs(numero).toFixed(2).split(".");
+            const interiFormattati = interi.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+            return `${segno}${interiFormattati},${decimali} €`;
+        }
+
+        function setText(id, value) {
+            document.getElementById(id).textContent = value;
+        }
+
+        function getSpese(dati) {
+            return Array.isArray(dati.spese) ? dati.spese : [];
+        }
+
+        function calcolaTotaleSpese(dati) {
+            return getSpese(dati).reduce((totale, spesa) => totale + (Number(spesa.importo) || 0), 0);
+        }
+
+        function aggiornaSintesi(datiCompleti, datiSuccessione, datiImmobili) {
+            const speseComplete = getSpese(datiCompleti);
+            const speseDaPagare = speseComplete.filter(spesa => !spesa.data);
+            const totaleDaPagare = speseDaPagare.reduce((totale, spesa) => totale + (Number(spesa.importo) || 0), 0);
+
+            setText("statTotaleSpese", formatEuro(calcolaTotaleSpese(datiCompleti)));
+            setText("statTotaleSuccessione", formatEuro(calcolaTotaleSpese(datiSuccessione)));
+            setText("statTotaleImmobili", formatEuro(calcolaTotaleSpese(datiImmobili)));
+            setText("statDaPagare", String(speseDaPagare.length));
+            setText("statTotaleDaPagare", formatEuro(totaleDaPagare));
+            setText("homeUpdated", "Sintesi aggiornata dai dati completi");
+
+            const status = document.getElementById("statusMessage");
+            status.textContent = "Sintesi calcolata dai dati completi.";
+            status.classList.remove("error");
+        }
+
+        async function caricaSintesi() {
+            try {
+                const [datiCompleti, datiSuccessione, datiImmobili] = await Promise.all([
+                    fetchJson("data/dati_completi.json"),
+                    fetchJson("data/successione.json"),
+                    fetchJson("data/immobili.json")
+                ]);
+
+                aggiornaSintesi(datiCompleti, datiSuccessione, datiImmobili);
+            } catch (error) {
+                setText("homeUpdated", "Sintesi non disponibile");
+
+                const status = document.getElementById("statusMessage");
+                status.textContent = "Sintesi non disponibile. Le dashboard restano consultabili dai link sopra.";
+                status.classList.add("error");
+            }
+        }
+
+        async function fetchJson(url) {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`${url}: HTTP ${response.status}`);
+            }
+
+            return response.json();
+        }
+
+        document.addEventListener("DOMContentLoaded", caricaSintesi);
+    </script>
+</body>
 </html>

@@ -1,4 +1,4 @@
-const CACHE_NAME = "gestore-conti-cache-v5";
+const CACHE_NAME = "gestore-conti-cache-v7";
 const URLS_TO_CACHE = [
   "./",
   "index.html",

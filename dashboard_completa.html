@@ -4,124 +4,131 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dati completi - Dashboard</title>
-	
-	<!-- Manifest e tema -->
-	<link rel="manifest" href="manifest.json">
-	<meta name="theme-color" content="#2196f3">
-	<link rel="icon" href="icon-192.png" type="image/png">
-	
-	<link rel="stylesheet" href="css/common.css">
-	<link rel="stylesheet" href="css/tema_completa.css">
 
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="icon" href="icon-192.png" type="image/png">
 
-	<!-- Registrazione service worker -->
-	<script>
-	  if ('serviceWorker' in navigator) {
-		navigator.serviceWorker.register('service-worker.js')
-		  .then(() => console.log("Service Worker registrato"))
-		  .catch(err => console.error("Errore SW:", err));
-	  }
-	</script>
-	
-	<body data-json="data/dati_completi.json">
-    	
-	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-	<script src="js/dashboard.js"></script>
-	<script>
-		async function caricaDati() {
-			const file = document.body.dataset.json;
-			const response = await fetch(file);
-			dati = await response.json();
-			inizializzaApp();
-		}
-		document.addEventListener('DOMContentLoaded', caricaDati);
-	</script>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/tema_completa.css">
 </head>
-<body>
-	
-	<header class="header-bar">
-		<div class="header-left">
-			<h1>📊 Dati di sintesi completi</h1>
-			<p class="subtitle">Dashboard completo delle spese e dei saldi tra eredi</p>
-		</div>
+<body data-json="data/dati_completi.json">
+    <header class="header-bar">
+        <div class="header-left">
+            <h1>Dati di sintesi completi</h1>
+            <p class="subtitle">Dashboard completa delle spese e dei saldi tra eredi</p>
+        </div>
 
-		<div class="header-right">
-			<button id="btn-export" class="header-btn" onclick="esportaPDF({
-				  titolo: 'Dashboard Completa',
-				  nomeFile: 'dati_completi_riepilogo.pdf',
-				  sottotitolo: 'Riepilogo spese e saldi'
-				})">Esporta PDF</button>
-			<button id="btn-back" class="header-btn" onclick="location.href='index.html'">Indietro</button>
-		</div>
-	</header>
-    
-    <div class="section">
-		<div class="section-header">
-			<h2>💰 Riepilogo per Erede</h2>
-			<p class="section-subtitle">Riepilogo tra dovuto e pagato, per singolo erede.</p>
-		</div>        
-        <div class="summary-grid" id="riepilogoEredi"></div>
-    </div>
-    
-    <div class="section">
-        <div class="section-header">
-			<h2>🎯 Situazione saldi</h2>
-			<p class="section-subtitle">Saldo finale tra gli eredi, calcolato come differenza tra quanto dovuto e quanto pagato.</p>
-		</div>
-        <div id="chiDeveAChi"></div>
-    </div>
-    
-    <div class="section">        
-		<div class="section-header">
-			<h2>📊 Spese</h2>
-			<p class="section-subtitle">Elenco spese in dettaglio</p>
-		</div>  		
-		
-        <div class="filters">
-			<select id="filtroCategoria">
-				<option value="">Tutte le categorie</option>
-			</select>
-			<input type="text" id="filtroRicerca" placeholder="Cerca descrizione...">
-			<label style="display:flex;align-items:center;gap:5px;">
-				<input type="checkbox" id="filtroDaPagare">
-				<span>Da pagare</span>
-			</label>
-		</div>
-        <table id="tabellaSpese">
-            <thead>
-                <tr>
-                    <th class="sortable" data-column="data" data-type="string">Data</th>
-                    <th class="sortable" data-column="categoria" data-type="string">Categoria</th>
-                    <th class="sortable" data-column="creditore" data-type="string">Creditore</th>
-                    <th class="sortable" data-column="descrizione" data-type="string">Descrizione</th>
-                    <th class="sortable" data-column="importo" data-type="number">Importo</th>
-                    <th>Pagato da</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
-    
-    <div class="section">        
-		<div class="section-header">
-			<h2>💸 Trasferimenti</h2>
-			<p class="section-subtitle">Elenco dei trasferimenti di denaro tra eredi</p>
-		</div>  
-        <table id="tabellaTrasferimenti">
-            <thead>
-                <tr>
-                    <th class="sortable" data-column="data" data-type="string">Data</th>
-                    <th class="sortable" data-column="da" data-type="string">Da</th>
-                    <th class="sortable" data-column="a" data-type="string">A</th>
-                    <th class="sortable" data-column="importo" data-type="number">Importo</th>
-                    <th>Note</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
+        <div class="header-right">
+            <button id="btn-export" class="header-btn" onclick="esportaPDF({
+                titolo: 'Dashboard Completa',
+                nomeFile: 'dati_completi_riepilogo.pdf',
+                sottotitolo: 'Riepilogo spese e saldi'
+            })">Esporta PDF</button>
+            <button id="btn-back" class="header-btn secondary" onclick="location.href='index.html'">Indietro</button>
+        </div>
+    </header>
 
-    <!-- Libreria jsPDF per export PDF -->
+    <main>
+        <section class="section summary-section">
+            <div class="section-header">
+                <div>
+                    <h2>Riepilogo per Erede</h2>
+                    <p class="section-subtitle">Riepilogo tra dovuto e pagato, per singolo erede. La barra indica l'entita relativa del saldo.</p>
+                </div>
+                <div class="balance-legend" aria-label="Legenda saldi">
+                    <span><i class="legend-dot credit"></i> deve ricevere</span>
+                    <span><i class="legend-dot debit"></i> deve versare</span>
+                </div>
+            </div>
+            <div class="summary-grid" id="riepilogoEredi"></div>
+        </section>
+
+        <section class="section expense-summary-section">
+            <div class="section-header">
+                <div>
+                    <h2>Sintesi spese</h2>
+                    <p class="section-subtitle">Totali raggruppati per categoria e creditore</p>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table id="tabellaSintesiSpese" class="summary-expense-table">
+                    <thead>
+                        <tr>
+                            <th>Categoria</th>
+                            <th>Creditore</th>
+                            <th class="amount-column">Totale</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot></tfoot>
+                </table>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-header">
+                <div>
+                    <h2>Spese</h2>
+                    <p class="section-subtitle">Elenco spese in dettaglio</p>
+                </div>
+            </div>
+
+            <div class="filters">
+                <select id="filtroCategoria" aria-label="Filtra per categoria">
+                    <option value="">Tutte le categorie</option>
+                </select>
+                <input type="text" id="filtroRicerca" placeholder="Cerca descrizione..." aria-label="Cerca descrizione">
+                <label class="checkbox-filter">
+                    <input type="checkbox" id="filtroDaPagare">
+                    <span>Da pagare</span>
+                </label>
+            </div>
+
+            <div class="table-wrap">
+                <table id="tabellaSpese">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-column="data" data-type="string">Data</th>
+                            <th class="sortable" data-column="categoria" data-type="string">Categoria</th>
+                            <th class="sortable" data-column="creditore" data-type="string">Creditore</th>
+                            <th class="sortable" data-column="descrizione" data-type="string">Descrizione</th>
+                            <th class="sortable amount-column" data-column="importo" data-type="number">Importo</th>
+                            <th>Pagato da</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-header">
+                <div>
+                    <h2>Trasferimenti</h2>
+                    <p class="section-subtitle">Elenco dei trasferimenti di denaro tra eredi</p>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table id="tabellaTrasferimenti">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-column="data" data-type="string">Data</th>
+                            <th class="sortable" data-column="da" data-type="string">Da</th>
+                            <th class="sortable" data-column="a" data-type="string">A</th>
+                            <th class="sortable amount-column" data-column="importo" data-type="number">Importo</th>
+                            <th>Note</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/dashboard.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 </body>
