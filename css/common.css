@@ -539,12 +539,18 @@ tr:hover {
         font-size: 0.9rem;
     }
 
+    .summary-expense-table {
+        min-width: 0;
+    }
+
+    #tabellaSintesiSpese tbody tr.sintesi-card-row td,
     #tabellaSpese tbody tr.spesa-card-row td,
     #tabellaTrasferimenti tbody tr.trasf-card-row td {
         border: none;
         padding: 0;
     }
 
+    .sintesi-card,
     .spesa-card,
     .trasf-card {
         margin-bottom: 10px;
@@ -555,6 +561,7 @@ tr:hover {
         box-shadow: 0 4px 14px rgba(15, 23, 42, 0.07);
     }
 
+    .sintesi-card-header,
     .spesa-card-header,
     .trasf-card-header {
         display: grid;
@@ -566,11 +573,17 @@ tr:hover {
         border-bottom: 1px solid var(--border);
     }
 
+    .sintesi-card-categoria,
     .spesa-card-title {
         display: flex;
         min-width: 0;
         flex-direction: column;
         gap: 2px;
+    }
+
+    .sintesi-card-categoria {
+        color: var(--text);
+        font-weight: 700;
     }
 
     .spesa-card-data,
@@ -583,12 +596,29 @@ tr:hover {
         font-size: 0.8rem;
     }
 
+    .sintesi-card-importo,
     .spesa-card-importo,
     .trasf-card-importo {
         color: var(--text);
         font-weight: 800;
         text-align: right;
         white-space: nowrap;
+    }
+
+    .sintesi-card-creditore {
+        color: #3f4652;
+        font-size: 0.84rem;
+    }
+
+    .sintesi-card-totale {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        background: var(--surface-soft);
+        border-color: var(--border-strong);
+        color: var(--text);
+        font-weight: 800;
     }
 
     .spesa-card-body,
