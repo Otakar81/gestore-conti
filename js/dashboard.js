@@ -64,6 +64,7 @@ function aggiornaLayoutTabelleSeNecessario() {
     }
 
     lastCardMode = current;
+    mostraSintesiSpese();
     mostraSpese();
     mostraTrasferimenti();
 }
@@ -181,8 +182,51 @@ function calcolaSintesiSpese() {
 
 function mostraSintesiSpese() {
     const tbody = document.querySelector("#tabellaSintesiSpese tbody");
+    const thead = document.querySelector("#tabellaSintesiSpese thead");
     const tfoot = document.querySelector("#tabellaSintesiSpese tfoot");
+    const cardMode = isMobileCardMode();
     const sintesi = calcolaSintesiSpese();
+
+    if (thead) {
+        thead.style.display = cardMode ? "none" : "table-header-group";
+    }
+
+    if (tfoot) {
+        tfoot.style.display = cardMode ? "none" : "table-footer-group";
+    }
+
+    if (cardMode) {
+        tbody.innerHTML = [
+            ...sintesi.righe.map(riga => `
+                <tr class="sintesi-card-row">
+                    <td colspan="3">
+                        <div class="sintesi-card">
+                            <div class="sintesi-card-header">
+                                <span class="sintesi-card-categoria">${riga.categoria}</span>
+                                <span class="sintesi-card-importo">${formatCurrency(riga.totale)}</span>
+                            </div>
+                            <div class="sintesi-card-creditore">
+                                <strong>Creditore:</strong> ${riga.creditore}
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            `),
+            `
+                <tr class="sintesi-card-row">
+                    <td colspan="3">
+                        <div class="sintesi-card sintesi-card-totale">
+                            <span>Totale</span>
+                            <span class="sintesi-card-importo">${formatCurrency(sintesi.totaleGenerale)}</span>
+                        </div>
+                    </td>
+                </tr>
+            `
+        ].join("");
+
+        tfoot.innerHTML = "";
+        return;
+    }
 
     tbody.innerHTML = sintesi.righe.map(riga => `
         <tr>
@@ -327,10 +371,12 @@ function mostraTrasferimenti() {
 }
 
 function formatCurrency(value) {
-    return new Intl.NumberFormat("it-IT", {
-        style: "currency",
-        currency: "EUR"
-    }).format(value);
+    const numero = Number(value) || 0;
+    const segno = numero < 0 ? "-" : "";
+    const [interi, decimali] = Math.abs(numero).toFixed(2).split(".");
+    const interiFormattati = interi.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+    return `${segno}${interiFormattati},${decimali} \u20ac`;
 }
 
 function ordinaTabella(tipo, th) {
