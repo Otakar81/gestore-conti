@@ -328,6 +328,20 @@
         "G.Claudio": 0.0,
         "M.Elena": 0.0
       }
+    },
+    {
+      "categoria": "Bollette",
+      "creditore": "Enel",
+      "descrizione": "Periodo: 06/26 -> 07/26",
+      "data": "2026/08",
+      "importo": 42.0,
+      "pagamenti": {
+        "Mamma": 42.0,
+        "Micaela": 0.0,
+        "Francesca": 0.0,
+        "G.Claudio": 0.0,
+        "M.Elena": 0.0
+      }
     }
   ],
   "trasferimenti": []
