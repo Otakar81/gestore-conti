@@ -370,6 +370,20 @@
         "G.Claudio": 0.0,
         "M.Elena": 0.0
       }
+    },
+    {
+      "categoria": "Bollette",
+      "creditore": "Enel",
+      "descrizione": "Periodo: 08/26 -> 09/26",
+      "data": "2026/09",
+      "importo": 66.0,
+      "pagamenti": {
+        "Mamma": 0.0,
+        "Micaela": 0.0,
+        "Francesca": 0.0,
+        "G.Claudio": 66.0,
+        "M.Elena": 0.0
+      }
     }
   ],
   "trasferimenti": []
