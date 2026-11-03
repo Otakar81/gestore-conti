@@ -1,146 +1,158 @@
 let dati = null;
+let pronto = false;
+const generale = document.body.dataset.vista === "completa";
+const esc = Conti.escapeHtml;
+
+function inizializzaViste() {
+    document.querySelectorAll('.view-tabs').forEach(tablist => {
+        const tabs = [...tablist.querySelectorAll('[role="tab"]')];
+        const seleziona = tab => {
+            tabs.forEach(item => {
+                const attivo = item === tab;
+                item.setAttribute('aria-selected', String(attivo));
+                item.tabIndex = attivo ? 0 : -1;
+                document.getElementById(item.getAttribute('aria-controls')).hidden = !attivo;
+            });
+        };
+        tabs.forEach((tab, index) => {
+            tab.addEventListener('click', () => seleziona(tab));
+            tab.addEventListener('keydown', event => {
+                let target;
+                if (event.key === 'ArrowRight') target = tabs[(index + 1) % tabs.length];
+                if (event.key === 'ArrowLeft') target = tabs[(index + tabs.length - 1) % tabs.length];
+                if (event.key === 'Home') target = tabs[0];
+                if (event.key === 'End') target = tabs[tabs.length - 1];
+                if (!target) return;
+                event.preventDefault();
+                seleziona(target);
+                target.focus();
+            });
+        });
+    });
+}
 let sortState = {
     spese: { column: null, direction: "asc" },
     trasferimenti: { column: null, direction: "asc" }
 };
 
-function isMobileCardMode() {
-    const isNarrow = window.innerWidth < 768;
-    const isPortrait = window.matchMedia
-        ? window.matchMedia("(orientation: portrait)").matches
-        : window.innerHeight > window.innerWidth;
-
-    return isNarrow && isPortrait;
+async function caricaDati() {
+    const status = document.getElementById("dataStatus");
+    const button = document.getElementById("btn-refresh");
+    button.disabled = true;
+    document.getElementById("btn-export").disabled = true;
+    status.textContent = "Lettura da Google Sheets in corso…";
+    status.classList.remove("error");
+    try {
+        dati = await Conti.carica(document.body.dataset.vista);
+        if (!pronto) {
+            inizializzaApp();
+            pronto = true;
+        } else {
+            Object.values(sortState).forEach(state => { state.column = null; state.direction = "asc"; });
+            document.querySelectorAll("th.sortable").forEach(th => th.classList.remove("sort-asc", "sort-desc"));
+            document.querySelectorAll(".sort-controls select").forEach(select => { select.value = ""; });
+            document.querySelectorAll(".sort-controls button").forEach(button => { button.disabled = true; button.textContent = "Inverti ordine"; });
+            document.querySelectorAll("th.sortable").forEach(th => th.setAttribute("aria-sort", "none"));
+            popolaFiltriCategorie();
+            renderDati();
+        }
+        const stamp = dati.lettoAlle.toLocaleString("it-IT");
+        status.textContent = `Ultima lettura riuscita: ${stamp}. ${dati.avvisi.join(" ")}`;
+        status.classList.toggle("error", !dati.saldoDisponibile);
+        document.getElementById("btn-export").disabled = !dati.saldoDisponibile;
+    } catch (error) {
+        status.textContent = `${error.message} ${dati ? `Dati precedenti del ${dati.lettoAlle.toLocaleString("it-IT")}, non aggiornati. Esportazione sospesa.` : "Dati e saldi non disponibili."}`;
+        status.classList.add("error");
+    } finally { button.disabled = false; }
 }
 
-let lastCardMode = null;
-
-async function caricaDati() {
-    const file = document.body.dataset.json;
-    const response = await fetch(file);
-    dati = await response.json();
-    inizializzaApp();
+function renderDati() {
+    calcolaRiepilogo();
+    mostraSintesiSpese();
+    mostraSpese();
+    mostraTrasferimenti();
+    mostraIncassi();
 }
 
 function inizializzaApp() {
-    calcolaRiepilogo();
-    mostraSintesiSpese();
     popolaFiltriCategorie();
-    mostraSpese();
-    mostraTrasferimenti();
+    renderDati();
 
     document.getElementById("filtroCategoria").addEventListener("change", mostraSpese);
     document.getElementById("filtroRicerca").addEventListener("input", mostraSpese);
     document.getElementById("filtroDaPagare").addEventListener("change", mostraSpese);
 
-    document.querySelectorAll("#tabellaSpese th.sortable").forEach(th => {
-        th.addEventListener("click", () => ordinaTabella("spese", th));
-    });
-
-    document.querySelectorAll("#tabellaTrasferimenti th.sortable").forEach(th => {
-        th.addEventListener("click", () => ordinaTabella("trasferimenti", th));
-    });
-
-    lastCardMode = isMobileCardMode();
-
-    window.addEventListener("resize", () => {
-        clearTimeout(window._resizeTimerDashboard);
-        window._resizeTimerDashboard = setTimeout(() => {
-            aggiornaLayoutTabelleSeNecessario();
-        }, 150);
-    });
-
-    window.addEventListener("orientationchange", () => {
-        setTimeout(() => {
-            aggiornaLayoutTabelleSeNecessario();
-        }, 200);
-    });
-}
-
-function aggiornaLayoutTabelleSeNecessario() {
-    const current = isMobileCardMode();
-    if (current === lastCardMode) {
-        return;
+    for (const [id, tipo] of [["tabellaSpese", "spese"], ["tabellaTrasferimenti", "trasferimenti"]]) {
+        const table = document.getElementById(id);
+        if (!table) continue;
+        const headings = [...table.querySelectorAll("th.sortable")];
+        const controls = document.createElement("div");
+        controls.className = "sort-controls";
+        const label = document.createElement("label");
+        label.htmlFor = `ordine-${tipo}`;
+        label.textContent = "Ordina per";
+        const select = document.createElement("select");
+        select.id = label.htmlFor;
+        select.add(new Option("Scegli una colonna", ""));
+        select.options[0].disabled = true;
+        headings.forEach(th => select.add(new Option(th.textContent, th.dataset.column)));
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "button";
+        button.textContent = "Inverti ordine";
+        button.disabled = true;
+        const sort = th => {
+            ordinaTabella(tipo, th);
+            select.value = th.dataset.column;
+            button.disabled = false;
+            button.textContent = sortState[tipo].direction === "asc" ? "Crescente ↑ · inverti" : "Decrescente ↓ · inverti";
+            headings.forEach(h => h.setAttribute("aria-sort", h === th ? (sortState[tipo].direction === "asc" ? "ascending" : "descending") : "none"));
+        };
+        select.addEventListener("change", () => {
+            if (select.value) sort(headings.find(th => th.dataset.column === select.value));
+        });
+        button.addEventListener("click", () => sort(headings.find(th => th.dataset.column === select.value)));
+        headings.forEach(th => {
+            th.tabIndex = 0;
+            th.setAttribute("aria-sort", "none");
+            th.addEventListener("click", () => sort(th));
+            th.addEventListener("keydown", event => {
+                if (event.key === "Enter" || event.key === " ") { event.preventDefault(); sort(th); }
+            });
+        });
+        controls.append(label, select, button);
+        table.parentElement.before(controls);
     }
-
-    lastCardMode = current;
-    mostraSintesiSpese();
-    mostraSpese();
-    mostraTrasferimenti();
 }
 
 function calcolaSaldoErede(erede) {
-    const quota = dati.quote_percentuali[erede] / 100;
-    const totaleImporti = dati.spese.reduce((sum, spesa) => sum + spesa.importo, 0);
-    const dovuto = totaleImporti * quota;
-    const pagato = dati.spese.reduce((sum, spesa) => sum + (spesa.pagamenti[erede] || 0), 0);
-    const trasferimentiRicevuti = dati.trasferimenti
-        .filter(t => t.a === erede)
-        .reduce((sum, t) => sum + t.importo, 0);
-    const trasferimentiInviati = dati.trasferimenti
-        .filter(t => t.da === erede)
-        .reduce((sum, t) => sum + t.importo, 0);
-    const saldo = dovuto - pagato + trasferimentiRicevuti - trasferimentiInviati;
-
-    return {
-        erede,
-        dovuto,
-        pagato,
-        trasferimentiRicevuti,
-        trasferimentiInviati,
-        saldo
-    };
+    return Conti.saldo(dati, erede);
 }
 
 function calcolaRiepilogo() {
-    const container = document.getElementById("riepilogoEredi");
-    container.innerHTML = "";
-
-    const riepiloghi = dati.eredi.map(calcolaSaldoErede);
-    const maxSaldoAssoluto = Math.max(...riepiloghi.map(item => Math.abs(item.saldo)), 1);
-
-    riepiloghi.forEach(item => {
-        const cardClass = item.saldo > 0.01 ? "debit" : (item.saldo < -0.01 ? "credit" : "neutral");
-        const balanceRatio = Math.abs(item.saldo) / maxSaldoAssoluto;
-        const balanceWidth = item.saldo === 0 ? 0 : Math.max(2, Math.round(balanceRatio * 100));
-
-        const card = document.createElement("div");
-        card.className = `summary-card ${cardClass}`;
-        card.style.setProperty("--balance-width", `${balanceWidth}%`);
-        card.innerHTML = `
-            <div class="summary-card-header">
-                <h3>${item.erede}</h3>
-            </div>
-            <div class="summary-card-body">
-                <div class="summary-row summary-base-row">
-                    <span class="label">Dovuto</span>
-                    <span class="value">${formatCurrency(item.dovuto)}</span>
-                </div>
-                <div class="summary-calc-group">
-                    <div class="summary-row">
-                        <span class="label"><span class="summary-operator minus">-</span>Pagato</span>
-                        <span class="value">${formatCurrency(item.pagato)}</span>
-                    </div>
-                    <div class="summary-row">
-                        <span class="label"><span class="summary-operator plus">+</span>Trasf. ricevuti</span>
-                        <span class="value">${formatCurrency(item.trasferimentiRicevuti)}</span>
-                    </div>
-                    <div class="summary-row">
-                        <span class="label"><span class="summary-operator minus">-</span>Trasf. inviati</span>
-                        <span class="value">${formatCurrency(item.trasferimentiInviati)}</span>
-                    </div>
-                </div>
-                <div class="summary-row saldo-row">
-                    <span class="label">Saldo</span>
-                    <span class="value saldo-value">${formatCurrency(item.saldo)}</span>
-                </div>
-                <div class="saldo-bar-track" aria-hidden="true">
-                    <div class="saldo-bar"></div>
-                </div>
-            </div>
-        `;
-        container.appendChild(card);
+    const labels = ["Erede", "Dovuto", generale ? "Anticipato" : "Sostenuto", ...(generale ? ["Trasf. ricevuti", "Trasf. inviati", "Incassi ricevuti", "Incassi spettanti"] : []), generale ? "Saldo generale" : "Differenza tematica"];
+    const rows = dati.eredi.map(erede => {
+        const item = calcolaSaldoErede(erede);
+        const values = [esc(item.erede), formatCurrency(item.dovuto), formatCurrency(item.pagato),
+            ...(generale ? [item.trasferimentiRicevuti, item.trasferimentiInviati, item.incassiRicevuti, item.incassiSpettanti].map(formatCurrency) : [])];
+        const state = item.saldo === null ? "Saldo sospeso" : item.saldo > 0 ? "Deve versare" : item.saldo < 0 ? "Deve ricevere" : "In pari";
+        const color = item.saldo > 0 ? "debit" : item.saldo < 0 ? "credit" : "";
+        values.push(generale ? `<span class="balance ${color}">${formatCurrency(item.saldo)}<small>${state}</small></span>` : formatCurrency(item.saldo));
+        const operators = ["", "", "−", "+", "−", "+", "−"];
+        return `<tr>${values.map((value, i) => `<td data-label="${labels[i]}"${generale && i > 0 && i < 7 ? ` data-operator="${operators[i]}"` : ""}>${value}</td>`).join("")}</tr>`;
     });
+    document.getElementById("riepilogoEredi").innerHTML = `<table class="position-table"><thead><tr>${labels.map(label => `<th scope="col">${label}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody></table>`;
+    if (!generale) {
+        const totale = dati.spese.reduce((sum, row) => sum + row.importo, 0);
+        const anticipato = dati.spese.reduce((sum, row) => sum + Object.values(row.pagamenti).reduce((a, b) => a + b, 0), 0);
+        for (const [id, value] of [["ambitoTotale", formatCurrency(totale)], ["ambitoAnticipato", formatCurrency(anticipato)], ["ambitoResiduo", formatCurrency(totale - anticipato)], ["ambitoNumero", String(dati.spese.length)]]) {
+            document.getElementById(id).textContent = value;
+        }
+    }
+}
+
+function righeTabella(rows, labels) {
+    return rows.length ? rows.map(values => `<tr>${values.map((value, i) => `<td data-label="${labels[i]}">${value}</td>`).join("")}</tr>`).join("") : `<tr class="empty-row"><td colspan="${labels.length}">Nessun movimento corrispondente.</td></tr>`;
 }
 
 function calcolaSintesiSpese() {
@@ -181,71 +193,52 @@ function calcolaSintesiSpese() {
 }
 
 function mostraSintesiSpese() {
-    const tbody = document.querySelector("#tabellaSintesiSpese tbody");
-    const thead = document.querySelector("#tabellaSintesiSpese thead");
-    const tfoot = document.querySelector("#tabellaSintesiSpese tfoot");
-    const cardMode = isMobileCardMode();
     const sintesi = calcolaSintesiSpese();
+    document.querySelector("#tabellaSintesiSpese tbody").innerHTML = righeTabella(sintesi.righe.map(row => [esc(row.categoria), esc(row.creditore), formatCurrency(row.totale)]), ["Categoria", "Creditore", "Totale"]);
+    document.querySelector("#tabellaSintesiSpese tfoot").innerHTML = `<tr class="summary-total-row"><td colspan="2">Totale spese</td><td class="currency">${formatCurrency(sintesi.totaleGenerale)}</td></tr>`;
+    mostraGraficiSpese(sintesi);
+}
 
-    if (thead) {
-        thead.style.display = cardMode ? "none" : "table-header-group";
-    }
+function raggruppaSintesi(righe, campo) {
+    const gruppi = new Map();
+    righe.forEach(riga => gruppi.set(riga[campo], (gruppi.get(riga[campo]) || 0) + riga.totale));
+    return [...gruppi].map(([nome, totale]) => ({ nome, totale }))
+        .sort((a, b) => b.totale - a.totale || a.nome.localeCompare(b.nome, 'it'));
+}
 
-    if (tfoot) {
-        tfoot.style.display = cardMode ? "none" : "table-footer-group";
-    }
-
-    if (cardMode) {
-        tbody.innerHTML = [
-            ...sintesi.righe.map(riga => `
-                <tr class="sintesi-card-row">
-                    <td colspan="3">
-                        <div class="sintesi-card">
-                            <div class="sintesi-card-header">
-                                <span class="sintesi-card-categoria">${riga.categoria}</span>
-                                <span class="sintesi-card-importo">${formatCurrency(riga.totale)}</span>
-                            </div>
-                            <div class="sintesi-card-creditore">
-                                <strong>Creditore:</strong> ${riga.creditore}
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-            `),
-            `
-                <tr class="sintesi-card-row">
-                    <td colspan="3">
-                        <div class="sintesi-card sintesi-card-totale">
-                            <span>Totale</span>
-                            <span class="sintesi-card-importo">${formatCurrency(sintesi.totaleGenerale)}</span>
-                        </div>
-                    </td>
-                </tr>
-            `
-        ].join("");
-
-        tfoot.innerHTML = "";
+function mostraGraficiSpese(sintesi) {
+    const container = document.getElementById('sintesi-grafici');
+    if (!sintesi.totaleGenerale) {
+        container.innerHTML = '<p class="empty-message">Totale spese pari a zero: nessuna distribuzione da rappresentare.</p>';
         return;
     }
-
-    tbody.innerHTML = sintesi.righe.map(riga => `
-        <tr>
-            <td>${riga.categoria}</td>
-            <td>${riga.creditore}</td>
-            <td class="currency">${formatCurrency(riga.totale)}</td>
-        </tr>
-    `).join("");
-
-    tfoot.innerHTML = `
-        <tr class="summary-total-row">
-            <td colspan="2">Totale</td>
-            <td class="currency">${formatCurrency(sintesi.totaleGenerale)}</td>
-        </tr>
-    `;
+    const percentuale = valore => new Intl.NumberFormat('it-IT', {style: 'percent', maximumFractionDigits: 2}).format(valore / sintesi.totaleGenerale);
+    const categorie = raggruppaSintesi(sintesi.righe, 'categoria');
+    const creditori = raggruppaSintesi(sintesi.righe, 'creditore');
+    let accumulato = 0;
+    const colori = categorie.map((_, index) => `hsl(${(index * 137.5) % 360} 45% 40%)`);
+    const segmenti = categorie.map((riga, index) => {
+        const inizio = accumulato;
+        accumulato += riga.totale;
+        return `${colori[index]} ${inizio / sintesi.totaleGenerale * 100}% ${accumulato / sintesi.totaleGenerale * 100}%`;
+    });
+    container.innerHTML = `
+        <p class="chart-total">Totale spese <strong>${formatCurrency(sintesi.totaleGenerale)}</strong></p>
+        <section class="expense-chart" aria-labelledby="chart-categorie-title">
+            <h3 id="chart-categorie-title">Per categoria</h3>
+            <div class="expense-donut" aria-hidden="true" style="background:conic-gradient(${segmenti.join(',')})"></div>
+            <ul class="chart-legend">${categorie.map((riga, index) => `<li><span class="chart-name"><span class="chart-swatch" aria-hidden="true" style="background:${colori[index]}"></span>${esc(riga.nome)}</span><span class="chart-value">${formatCurrency(riga.totale)} <small>${percentuale(riga.totale)}</small></span></li>`).join('')}</ul>
+        </section>
+        <section class="expense-chart" aria-labelledby="chart-creditori-title">
+            <h3 id="chart-creditori-title">Per creditore</h3>
+            <ul class="chart-bars">${creditori.map(riga => `<li><div class="chart-bar-label"><span class="chart-name">${esc(riga.nome)}</span><span class="chart-value">${formatCurrency(riga.totale)} <small>${percentuale(riga.totale)}</small></span></div><div class="chart-track" aria-hidden="true"><span style="width:${riga.totale / sintesi.totaleGenerale * 100}%"></span></div></li>`).join('')}</ul>
+        </section>`;
 }
 
 function popolaFiltriCategorie() {
     const select = document.getElementById("filtroCategoria");
+    const precedente = select.value;
+    select.replaceChildren(new Option("Tutte le categorie", ""));
     const categorie = [...new Set(dati.spese.map(s => s.categoria))].filter(c => c);
 
     categorie.forEach(cat => {
@@ -254,17 +247,11 @@ function popolaFiltriCategorie() {
         option.textContent = cat;
         select.appendChild(option);
     });
+    if (categorie.includes(precedente)) select.value = precedente;
 }
 
 function mostraSpese() {
     const tbody = document.querySelector("#tabellaSpese tbody");
-    const thead = document.querySelector("#tabellaSpese thead");
-    const cardMode = isMobileCardMode();
-
-    if (thead) {
-        thead.style.display = cardMode ? "none" : "table-header-group";
-    }
-
     const filtroCategoria = document.getElementById("filtroCategoria").value;
     const filtroRicerca = document.getElementById("filtroRicerca").value.toLowerCase();
     const filtroDaPagare = document.getElementById("filtroDaPagare").checked;
@@ -279,99 +266,45 @@ function mostraSpese() {
         return matchCategoria && matchRicerca && matchDaPagare;
     });
 
-    if (!cardMode) {
-        tbody.innerHTML = speseFiltrate.map(spesa => {
-            const pagatoDa = Object.entries(spesa.pagamenti)
-                .filter(([_, importo]) => importo > 0)
-                .map(([erede, importo]) => `${erede} (${formatCurrency(importo)})`)
-                .join(", ") || "Nessuno";
-
-            return `
-                <tr>
-                    <td>${spesa.data || '<em style="color:#999;">-</em>'}</td>
-                    <td>${spesa.categoria}</td>
-                    <td>${spesa.creditore}</td>
-                    <td>${spesa.descrizione}</td>
-                    <td class="currency">${formatCurrency(spesa.importo)}</td>
-                    <td>${pagatoDa}</td>
-                </tr>
-            `;
-        }).join("");
-        return;
-    }
-
-    tbody.innerHTML = speseFiltrate.map(spesa => {
-        const pagatoDa = Object.entries(spesa.pagamenti)
-            .filter(([_, importo]) => importo > 0)
-            .map(([erede, importo]) => `${erede} (${formatCurrency(importo)})`)
-            .join(", ") || "Nessuno";
-
-        return `
-            <tr class="spesa-card-row">
-                <td colspan="6">
-                    <div class="spesa-card">
-                        <div class="spesa-card-header">
-                            <div class="spesa-card-title">
-                                <span class="spesa-card-data">${spesa.data || "-"}</span>
-                                <span class="spesa-card-categoria">${spesa.categoria || ""}</span>
-                            </div>
-                            <div class="spesa-card-importo">${formatCurrency(spesa.importo)}</div>
-                        </div>
-                        <div class="spesa-card-body">
-                            <div class="spesa-card-descrizione">${spesa.descrizione || ""}</div>
-                            <div class="spesa-card-creditore"><strong>Creditore:</strong> ${spesa.creditore || ""}</div>
-                            <div class="spesa-card-pagato"><strong>Pagato da:</strong> ${pagatoDa}</div>
-                        </div>
-                    </div>
-                </td>
-            </tr>
-        `;
-    }).join("");
+    tbody.innerHTML = righeTabella(speseFiltrate.map(spesa => {
+        const pagatoDa = Object.entries(spesa.pagamenti).filter(([, value]) => value > 0)
+            .map(([erede, value]) => `${esc(erede)} (${formatCurrency(value)})`).join(", ") || "Nessuno";
+        return [esc(spesa.data || "—"), esc(spesa.categoria), esc(spesa.creditore),
+            `${esc(spesa.descrizione)}<small class="row-meta">${esc(spesa.ripartizione)}${generale ? ` · ${esc(spesa.ambito)}` : ""}</small>`, formatCurrency(spesa.importo), pagatoDa];
+    }), ["Data", "Categoria", "Creditore", "Descrizione", "Importo", "Pagato da"]);
 }
 
 function mostraTrasferimenti() {
-    const tbody = document.querySelector("#tabellaTrasferimenti tbody");
-    const thead = document.querySelector("#tabellaTrasferimenti thead");
-    const cardMode = isMobileCardMode();
+    if (!generale) return;
+    document.querySelector("#tabellaTrasferimenti tbody").innerHTML = righeTabella(dati.trasferimenti.map(t => [esc(t.data), esc(t.da), esc(t.a), formatCurrency(t.importo), esc(t.note || "")]), ["Data", "Da", "A", "Importo", "Note"]);
+}
 
-    if (thead) {
-        thead.style.display = cardMode ? "none" : "table-header-group";
+function mostraIncassi() {
+    if (!generale) return;
+    const tbody = document.querySelector("#tabellaIncassi tbody");
+    tbody.replaceChildren();
+    for (const riga of dati.incassi) {
+        const tr = document.createElement("tr");
+        const distribuzione = dati.eredi.map(erede =>
+            `${erede}: ${formatCurrency(riga.pagamenti[erede])} ricevuti / ${formatCurrency(riga.quote[erede])} spettanti`).join("\n");
+        const values = [riga.id, riga.data, riga.tipo, riga.descrizione, riga.periodo,
+            formatCurrency(riga.importo), riga.ripartizione, distribuzione, riga.note];
+        const labels = ["ID", "Data", "Tipo", "Descrizione", "Periodo", "Importo", "Ripartizione", "Distribuzione", "Note"];
+        values.forEach((value, index) => {
+            const td = document.createElement("td");
+            td.textContent = value;
+            td.dataset.label = labels[index];
+            tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
     }
-
-    if (!cardMode) {
-        tbody.innerHTML = dati.trasferimenti.map(t => `
-            <tr>
-                <td>${t.data}</td>
-                <td>${t.da}</td>
-                <td>${t.a}</td>
-                <td class="currency positive-amount">${formatCurrency(t.importo)}</td>
-                <td>${t.note || ""}</td>
-            </tr>
-        `).join("");
-        return;
-    }
-
-    tbody.innerHTML = dati.trasferimenti.map(t => `
-        <tr class="trasf-card-row">
-            <td colspan="5">
-                <div class="trasf-card">
-                    <div class="trasf-card-header">
-                        <span class="trasf-card-data">${t.data || "-"}</span>
-                        <span class="trasf-card-importo">${formatCurrency(t.importo)}</span>
-                    </div>
-                    <div class="trasf-card-body">
-                        <div><strong>Da:</strong> ${t.da}</div>
-                        <div><strong>A:</strong> ${t.a}</div>
-                        ${t.note ? `<div class="trasf-card-note">${t.note}</div>` : ""}
-                    </div>
-                </div>
-            </td>
-        </tr>
-    `).join("");
+    document.getElementById("incassiEmpty").hidden = dati.incassi.length > 0;
+    document.getElementById("incassiTableWrap").hidden = dati.incassi.length === 0;
 }
 
 function formatCurrency(value) {
-    const numero = Number(value) || 0;
+    if (value === null) return "Non disponibile";
+    const numero = value / 100;
     const segno = numero < 0 ? "-" : "";
     const [interi, decimali] = Math.abs(numero).toFixed(2).split(".");
     const interiFormattati = interi.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -423,10 +356,11 @@ function ordinaTabella(tipo, th) {
 }
 
 async function esportaPDF(opzioni = {}) {
+    if (!dati?.saldoDisponibile || document.getElementById("btn-export").disabled) return;
     const {
         titolo = "Dashboard Successione",
         nomeFile = "successione_riepilogo.pdf",
-        sottotitolo = "Riepilogo pagamenti e trasferimenti"
+        sottotitolo = generale ? "Posizione generale verso il gruppo" : "Differenza tematica: dovuto meno sostenuto"
     } = opzioni;
 
     const { jsPDF } = window.jspdf;
@@ -479,7 +413,7 @@ async function esportaPDF(opzioni = {}) {
     doc.setFontSize(9);
     doc.setTextColor(...colori.muted);
     doc.text(sottotitolo, margini.left, 25);
-    doc.text(`Generato il: ${new Date().toLocaleDateString("it-IT")}`, margini.left, 31);
+    doc.text(`Lettura dati: ${dati.lettoAlle.toLocaleString("it-IT")}`, margini.left, 31);
 
     let yPos = 39;
 
@@ -491,8 +425,10 @@ async function esportaPDF(opzioni = {}) {
             erede,
             formatCurrency(riepilogo.dovuto),
             formatCurrency(riepilogo.pagato),
-            formatCurrency(riepilogo.trasferimentiRicevuti),
-            formatCurrency(riepilogo.trasferimentiInviati),
+            ...(generale ? [formatCurrency(riepilogo.trasferimentiRicevuti),
+                formatCurrency(riepilogo.trasferimentiInviati),
+                formatCurrency(riepilogo.incassiRicevuti),
+                formatCurrency(riepilogo.incassiSpettanti)] : []),
             formatCurrency(riepilogo.saldo)
         ];
     });
@@ -500,15 +436,12 @@ async function esportaPDF(opzioni = {}) {
     doc.autoTable({
         ...stileTabella,
         startY: yPos,
-        head: [["Erede", "Dovuto", "Pagato", "Trasf. Ric.", "Trasf. Inv.", "Saldo"]],
+        head: [generale ? ["Erede", "Dovuto", "Anticipato", "Trasf. ric.", "Trasf. inv.", "Inc. ric.", "Inc. spett.", "Saldo"]
+            : ["Erede", "Dovuto", "Sostenuto", "Differenza tematica"]],
         body: riepilogoData,
-        columnStyles: {
-            1: { halign: "right" },
-            2: { halign: "right" },
-            3: { halign: "right" },
-            4: { halign: "right" },
-            5: { halign: "right", fontStyle: "bold" }
-        }
+        styles: { ...stileTabella.styles, fontSize: generale ? 7 : 8.5 },
+        columnStyles: Object.fromEntries(Array.from({length: generale ? 7 : 3}, (_, index) =>
+            [index + 1, {halign: "right", fontStyle: index === (generale ? 6 : 2) ? "bold" : "normal"}]))
     });
 
     yPos = doc.lastAutoTable.finalY + 10;
@@ -558,12 +491,12 @@ async function esportaPDF(opzioni = {}) {
     const maxSaldoAssoluto = Math.max(...saldiSintesi.map(item => Math.abs(item.saldo)), 1);
 
     assicuratiSpazio(54);
-    titoloSezione("Sintesi saldi");
+    titoloSezione(generale ? "Sintesi saldi generali" : "Sintesi differenze tematiche");
 
     doc.autoTable({
         ...stileTabella,
         startY: yPos,
-        head: [["Erede", "Saldo", "Indicatore"]],
+        head: [["Erede", generale ? "Saldo generale" : "Differenza tematica", "Indicatore"]],
         body: saldiSintesi.map(item => [item.erede, formatCurrency(item.saldo), ""]),
         styles: { ...stileTabella.styles, fontSize: 8.5, cellPadding: 2.6 },
         columnStyles: {
@@ -573,9 +506,9 @@ async function esportaPDF(opzioni = {}) {
         didParseCell: data => {
             if (data.section === "body" && data.column.index === 1) {
                 const saldo = saldiSintesi[data.row.index].saldo;
-                if (saldo > 0.01) {
+                if (saldo > 0) {
                     data.cell.styles.textColor = colori.debit;
-                } else if (saldo < -0.01) {
+                } else if (saldo < 0) {
                     data.cell.styles.textColor = colori.credit;
                 }
                 data.cell.styles.fontStyle = "bold";
@@ -611,6 +544,7 @@ async function esportaPDF(opzioni = {}) {
 
     yPos = doc.lastAutoTable.finalY + 10;
 
+    if (generale) {
     assicuratiSpazio(46);
     titoloSezione("Trasferimenti");
 
@@ -633,6 +567,23 @@ async function esportaPDF(opzioni = {}) {
         }
     });
 
+    yPos = doc.lastAutoTable.finalY + 10;
+    assicuratiSpazio(46);
+    titoloSezione("Incassi e distribuzione");
+    doc.autoTable({
+        ...stileTabella,
+        startY: yPos,
+        head: [["ID / data", "Tipo / descrizione / periodo", "Importo / ripartizione", "Ricevuti / spettanti per erede", "Note"]],
+        body: dati.incassi.length ? dati.incassi.map(riga => [
+            `${riga.id}\n${riga.data}`, `${riga.tipo}\n${riga.descrizione}\n${riga.periodo}`,
+            `${formatCurrency(riga.importo)}\n${riga.ripartizione}`,
+            dati.eredi.map(erede => `${erede}: ${formatCurrency(riga.pagamenti[erede])} / ${formatCurrency(riga.quote[erede])}`).join("\n"),
+            riga.note
+        ]) : [["Nessun incasso registrato", "", "", "", ""]],
+        styles: { ...stileTabella.styles, fontSize: 7.5 }
+    });
+    }
+
     doc.addPage();
     yPos = 20;
     titoloSezione("Elenco Spese");
@@ -646,7 +597,7 @@ async function esportaPDF(opzioni = {}) {
             spesa.data || "-",
             spesa.categoria,
             spesa.creditore,
-            spesa.descrizione,
+            `${spesa.descrizione}\nRipartizione: ${spesa.ripartizione}${generale ? `\nAmbito: ${spesa.ambito}` : ""}`,
             formatCurrency(spesa.importo),
             pagatoDa
         ];
@@ -666,4 +617,8 @@ async function esportaPDF(opzioni = {}) {
     doc.save(nomeFile);
 }
 
-document.addEventListener("DOMContentLoaded", caricaDati);
+document.getElementById("btn-refresh").addEventListener("click", caricaDati);
+document.addEventListener("DOMContentLoaded", () => {
+    inizializzaViste();
+    caricaDati();
+});
