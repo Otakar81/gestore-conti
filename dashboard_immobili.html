@@ -6,53 +6,46 @@
     <title>Immobili - Dashboard</title>
 
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1d9100">
+    <meta name="theme-color" content="#24645c">
     <link rel="icon" href="icon-192.png" type="image/png">
 
     <link rel="stylesheet" href="css/common.css">
-    <link rel="stylesheet" href="css/tema_immobili.css">
 </head>
-<body data-json="data/immobili.json">
-    <header class="header-bar">
-        <div class="header-left">
-            <h1>Immobili</h1>
-            <p class="subtitle">Dashboard spese condominiali e utenze</p>
-        </div>
-
-        <div class="header-right">
-            <button id="btn-export" class="header-btn" onclick="esportaPDF({
-                titolo: 'Dashboard Immobili',
-                nomeFile: 'immobili_riepilogo.pdf',
-                sottotitolo: 'Riepilogo spese e saldi'
-            })">Esporta PDF</button>
-            <button id="btn-back" class="header-btn secondary" onclick="location.href='index.html'">Indietro</button>
-        </div>
-    </header>
-
-    <main>
-        <section class="section summary-section">
-            <div class="section-header">
-                <div>
-                    <h2>Riepilogo per Erede</h2>
-                    <p class="section-subtitle">Riepilogo tra dovuto e pagato, per singolo erede. La barra indica l'entita relativa del saldo.</p>
-                </div>
-                <div class="balance-legend" aria-label="Legenda saldi">
-                    <span><i class="legend-dot credit"></i> deve ricevere</span>
-                    <span><i class="legend-dot debit"></i> deve versare</span>
-                </div>
+<body data-vista="immobili"><div class="shell"><header class="masthead">
+            <a class="brand" href="index.html"><span>Conti di famiglia</span>Monitoraggio eredità</a>
+            <div class="page-heading">
+                <h1>Immobili</h1>
+                <p class="subtitle">Utenze, manutenzione e tributi: importi sostenuti, spese scoperte e dettaglio.</p>
             </div>
-            <div class="summary-grid" id="riepilogoEredi"></div>
-        </section>
+        </header>
+        <div class="page-toolbar">
+            <nav class="navigation" aria-label="Navigazione principale"><a href="index.html">Home</a><a href="dashboard_successione.html">Successione</a><a href="dashboard_immobili.html" aria-current="page">Immobili</a><a href="dashboard_completa.html">Generale</a></nav>
+            <div class="header-right">
+                <button id="btn-refresh" class="header-btn secondary" type="button">Aggiorna dati</button>
+                <button id="btn-export" disabled class="header-btn" onclick="esportaPDF({
+                    titolo: 'Dashboard Immobili',
+                    nomeFile: 'immobili_riepilogo.pdf',
+                    sottotitolo: 'Differenza tematica: dovuto meno sostenuto'
+                })">Esporta PDF</button>
+            </div>
+        </div>
 
-        <section class="section expense-summary-section">
+    <p id="dataStatus" class="data-status" role="status" aria-live="polite">Lettura dati in corso…</p>
+    <main>
+<section class="stats-grid" aria-label="Sintesi economica dell’ambito"><div class="stat-card"><div class="stat-label">Totale spese</div><div class="stat-value" id="ambitoTotale">—</div></div><div class="stat-card"><div class="stat-label">Spese sostenute</div><div class="stat-value" id="ambitoAnticipato">—</div></div><div class="stat-card"><div class="stat-label">Spese scoperte</div><div class="stat-value" id="ambitoResiduo">—</div></div><div class="stat-card"><div class="stat-label">Spese registrate</div><div class="stat-value" id="ambitoNumero">—</div></div></section>        <section class="section expense-summary-section">
             <div class="section-header">
                 <div>
                     <h2>Sintesi spese</h2>
-                    <p class="section-subtitle">Totali raggruppati per categoria e creditore</p>
+                    <p class="section-subtitle">Tutte le spese di questo ambito, incluse quelle ancora da sostenere. I filtri del dettaglio non modificano questa sintesi.</p>
                 </div>
             </div>
 
-            <div class="table-wrap">
+            <div class="view-tabs" role="tablist" aria-label="Vista della sintesi spese">
+                <button type="button" id="tab-grafici" role="tab" aria-controls="sintesi-grafici" aria-selected="true">Grafici</button>
+                <button type="button" id="tab-tabella" role="tab" aria-controls="sintesi-tabella" aria-selected="false" tabindex="-1">Tabella</button>
+            </div>
+            <div id="sintesi-grafici" class="expense-charts" role="tabpanel" aria-labelledby="tab-grafici" tabindex="0"></div>
+            <div id="sintesi-tabella" class="table-wrap" role="tabpanel" aria-labelledby="tab-tabella" tabindex="0" hidden>
                 <table id="tabellaSintesiSpese" class="summary-expense-table">
                     <thead>
                         <tr>
@@ -103,31 +96,13 @@
             </div>
         </section>
 
-        <section class="section">
-            <div class="section-header">
-                <div>
-                    <h2>Trasferimenti</h2>
-                    <p class="section-subtitle">Elenco dei trasferimenti di denaro tra eredi</p>
-                </div>
-            </div>
 
-            <div class="table-wrap">
-                <table id="tabellaTrasferimenti">
-                    <thead>
-                        <tr>
-                            <th class="sortable" data-column="data" data-type="string">Data</th>
-                            <th class="sortable" data-column="da" data-type="string">Da</th>
-                            <th class="sortable" data-column="a" data-type="string">A</th>
-                            <th class="sortable amount-column" data-column="importo" data-type="number">Importo</th>
-                            <th>Note</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </section>
+<details class="disclosure"><summary>Come sono ripartite queste spese</summary><div class="disclosure-body"><p>Dovuto, sostenuto e differenza riguardano soltanto questo ambito e non rappresentano la posizione complessiva verso il gruppo. Consulta la <a href="dashboard_completa.html">situazione generale</a>.</p><div id="riepilogoEredi" class="table-wrap"></div></div></details>
     </main>
 
+    </div>
+    <script src="js/pwa.js"></script>
+    <script src="js/dati.js"></script>
     <script src="js/dashboard.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>

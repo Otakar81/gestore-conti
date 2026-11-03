@@ -2,9 +2,10 @@
   "name": "Gestore Spese",
   "short_name": "GestoreConti",
   "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#f5f7fa",
+  "background_color": "#f5f3eb",
+  "theme_color": "#24645c",
   "icons": [
     {
       "src": "icon-192.png",

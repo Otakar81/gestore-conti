@@ -6,53 +6,46 @@
     <title>Dati completi - Dashboard</title>
 
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#2563eb">
+    <meta name="theme-color" content="#24645c">
     <link rel="icon" href="icon-192.png" type="image/png">
 
     <link rel="stylesheet" href="css/common.css">
-    <link rel="stylesheet" href="css/tema_completa.css">
 </head>
-<body data-json="data/dati_completi.json">
-    <header class="header-bar">
-        <div class="header-left">
-            <h1>Dati di sintesi completi</h1>
-            <p class="subtitle">Dashboard completa delle spese e dei saldi tra eredi</p>
-        </div>
-
-        <div class="header-right">
-            <button id="btn-export" class="header-btn" onclick="esportaPDF({
-                titolo: 'Dashboard Completa',
-                nomeFile: 'dati_completi_riepilogo.pdf',
-                sottotitolo: 'Riepilogo spese e saldi'
-            })">Esporta PDF</button>
-            <button id="btn-back" class="header-btn secondary" onclick="location.href='index.html'">Indietro</button>
-        </div>
-    </header>
-
-    <main>
-        <section class="section summary-section">
-            <div class="section-header">
-                <div>
-                    <h2>Riepilogo per Erede</h2>
-                    <p class="section-subtitle">Riepilogo tra dovuto e pagato, per singolo erede. La barra indica l'entita relativa del saldo.</p>
-                </div>
-                <div class="balance-legend" aria-label="Legenda saldi">
-                    <span><i class="legend-dot credit"></i> deve ricevere</span>
-                    <span><i class="legend-dot debit"></i> deve versare</span>
-                </div>
+<body data-vista="completa"><div class="shell"><header class="masthead">
+            <a class="brand" href="index.html"><span>Conti di famiglia</span>Monitoraggio eredità</a>
+            <div class="page-heading">
+                <h1>Situazione generale</h1>
+                <p class="subtitle">Dashboard completa delle spese e dei saldi tra eredi</p>
             </div>
-            <div class="summary-grid" id="riepilogoEredi"></div>
-        </section>
+        </header>
+        <div class="page-toolbar">
+            <nav class="navigation" aria-label="Navigazione principale"><a href="index.html">Home</a><a href="dashboard_successione.html">Successione</a><a href="dashboard_immobili.html">Immobili</a><a href="dashboard_completa.html" aria-current="page">Generale</a></nav>
+            <div class="header-right">
+                <button id="btn-refresh" class="header-btn secondary" type="button">Aggiorna dati</button>
+                <button id="btn-export" disabled class="header-btn" onclick="esportaPDF({
+                    titolo: 'Dashboard Completa',
+                    nomeFile: 'dati_completi_riepilogo.pdf',
+                    sottotitolo: 'Posizione generale verso il gruppo'
+                })">Esporta PDF</button>
+            </div>
+        </div>
 
-        <section class="section expense-summary-section">
+    <p id="dataStatus" class="data-status" role="status" aria-live="polite">Lettura dati in corso…</p>
+    <main>
+<section class="section summary-section"><div class="section-header"><h2>Il punto tra di noi</h2><p class="section-subtitle">Posizione complessiva verso il gruppo, incluse le spese ancora da anticipare. Positivo: deve versare; negativo: deve ricevere. Il saldo non è un’istruzione di bonifico.</p></div><div class="table-wrap" id="riepilogoEredi"></div></section>        <section class="section expense-summary-section">
             <div class="section-header">
                 <div>
                     <h2>Sintesi spese</h2>
-                    <p class="section-subtitle">Totali raggruppati per categoria e creditore</p>
+                    <p class="section-subtitle">Tutte le spese, incluse quelle ancora da sostenere. I filtri del dettaglio non modificano questa sintesi.</p>
                 </div>
             </div>
 
-            <div class="table-wrap">
+            <div class="view-tabs" role="tablist" aria-label="Vista della sintesi spese">
+                <button type="button" id="tab-grafici" role="tab" aria-controls="sintesi-grafici" aria-selected="true">Grafici</button>
+                <button type="button" id="tab-tabella" role="tab" aria-controls="sintesi-tabella" aria-selected="false" tabindex="-1">Tabella</button>
+            </div>
+            <div id="sintesi-grafici" class="expense-charts" role="tabpanel" aria-labelledby="tab-grafici" tabindex="0"></div>
+            <div id="sintesi-tabella" class="table-wrap" role="tabpanel" aria-labelledby="tab-tabella" tabindex="0" hidden>
                 <table id="tabellaSintesiSpese" class="summary-expense-table">
                     <thead>
                         <tr>
@@ -67,10 +60,17 @@
             </div>
         </section>
 
-        <section class="section">
+        <section class="section movement-details" aria-labelledby="dettagli-title">
+            <div class="section-header"><h2 id="dettagli-title">Dettagli</h2></div>
+            <div class="view-tabs" role="tablist" aria-label="Tipo di movimento">
+                <button type="button" id="tab-spese" role="tab" aria-controls="dettagli-spese" aria-selected="true">Spese</button>
+                <button type="button" id="tab-trasferimenti" role="tab" aria-controls="dettagli-trasferimenti" aria-selected="false" tabindex="-1">Trasferimenti</button>
+                <button type="button" id="tab-incassi" role="tab" aria-controls="dettagli-incassi" aria-selected="false" tabindex="-1">Incassi</button>
+            </div>
+        <section id="dettagli-spese" role="tabpanel" aria-labelledby="tab-spese" tabindex="0">
             <div class="section-header">
                 <div>
-                    <h2>Spese</h2>
+                    <h3>Spese</h3>
                     <p class="section-subtitle">Elenco spese in dettaglio</p>
                 </div>
             </div>
@@ -103,10 +103,10 @@
             </div>
         </section>
 
-        <section class="section">
+        <section id="dettagli-trasferimenti" role="tabpanel" aria-labelledby="tab-trasferimenti" tabindex="0" hidden>
             <div class="section-header">
                 <div>
-                    <h2>Trasferimenti</h2>
+                    <h3>Trasferimenti</h3>
                     <p class="section-subtitle">Elenco dei trasferimenti di denaro tra eredi</p>
                 </div>
             </div>
@@ -126,8 +126,21 @@
                 </table>
             </div>
         </section>
+            <section id="dettagli-incassi" role="tabpanel" aria-labelledby="tab-incassi" tabindex="0" hidden>
+            <div class="section-header"><div><h3>Incassi</h3>
+                <p class="section-subtitle">Vendite, affitti e altre entrate effettive. Ricevuto e spettante per ciascun erede.</p></div></div>
+            <p id="incassiEmpty" class="empty-message" hidden>Nessun incasso registrato.</p>
+            <div id="incassiTableWrap" class="table-wrap" hidden><table id="tabellaIncassi">
+                <thead><tr><th>ID</th><th>Data</th><th>Tipo</th><th>Descrizione</th><th>Periodo</th><th>Importo</th><th>Ripartizione</th><th>Distribuzione</th><th>Note</th></tr></thead>
+                <tbody></tbody>
+            </table></div>
+        </section>
+        </section>
     </main>
 
+    </div>
+    <script src="js/pwa.js"></script>
+    <script src="js/dati.js"></script>
     <script src="js/dashboard.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
